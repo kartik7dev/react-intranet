@@ -73,30 +73,36 @@ export const AuthProvider = (props) => {
     initialized.current = true;
 
     let isAuthenticated = false;
-
+    let user = null;
+    
     try {
-      isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
+      const token = localStorage.getItem('token');
+  
+      if (token) {
+        // Verify the JWT token on the backend
+        const response = await fetch('/refresh', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+  
+        if (response.ok) {
+          isAuthenticated = true;
+          user = await response.json();
+        }
+      }
     } catch (err) {
       console.error(err);
     }
+  
+    dispatch({
+      type: HANDLERS.INITIALIZE,
+      payload: user || undefined
+    });
 
-    if (isAuthenticated) {
-      const user = {
-        id: '5e86809283e28b96d2d38537',
-        avatar: '/assets/avatars/avatar-anika-visser.png',
-        name: 'Anika Visser',
-        email: 'anika.visser@devias.io'
-      };
-
-      dispatch({
-        type: HANDLERS.INITIALIZE,
-        payload: user
-      });
-    } else {
-      dispatch({
-        type: HANDLERS.INITIALIZE
-      });
-    }
+  
   };
 
   useEffect(
@@ -107,48 +113,37 @@ export const AuthProvider = (props) => {
     []
   );
 
-  const skip = () => {
-    try {
-      window.sessionStorage.setItem('authenticated', 'true');
-    } catch (err) {
-      console.error(err);
+  const signIn = async (username, password) => {
+    try{
+    const response = await fetch('http://localhost:3500/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username,
+        password
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Please check your username and password');
     }
 
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
+    const { token, user } = await response.json();
+
+    // Store the JWT token in local storage
+    localStorage.setItem('token', token);
 
     dispatch({
       type: HANDLERS.SIGN_IN,
       payload: user
     });
-  };
-
-  const signIn = async (email, password) => {
-    if (email !== 'demo@devias.io' || password !== 'Password123!') {
-      throw new Error('Please check your email and password');
-    }
-
-    try {
-      window.sessionStorage.setItem('authenticated', 'true');
     } catch (err) {
       console.error(err);
+  
+      throw err;
     }
-
-    const user = {
-      id: '5e86809283e28b96d2d38537',
-      avatar: '/assets/avatars/avatar-anika-visser.png',
-      name: 'Anika Visser',
-      email: 'anika.visser@devias.io'
-    };
-
-    dispatch({
-      type: HANDLERS.SIGN_IN,
-      payload: user
-    });
   };
 
   const signUp = async (email, name, password) => {
@@ -156,6 +151,7 @@ export const AuthProvider = (props) => {
   };
 
   const signOut = () => {
+    localStorage.removeItem('token');
     dispatch({
       type: HANDLERS.SIGN_OUT
     });
@@ -165,7 +161,6 @@ export const AuthProvider = (props) => {
     <AuthContext.Provider
       value={{
         ...state,
-        skip,
         signIn,
         signUp,
         signOut
