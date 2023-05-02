@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
+import axios from '../api/axios'
+const LOGIN_URL = '/auth'
+const REFRESH_TOKEN_URL = '/refresh'
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
@@ -80,21 +83,38 @@ export const AuthProvider = (props) => {
   
       if (token) {
         // Verify the JWT token on the backend
-        const response = await fetch('/refresh', {
-          method: 'POST',
+        const response = await axios.post(REFRESH_TOKEN_URL, {}, {
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           }
         });
+        // const response = await fetch('/refresh', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //     Authorization: `Bearer ${token}`
+        //   }
+        // });
   
-        if (response.ok) {
+        if (response.status === 200) {
           isAuthenticated = true;
-          user = await response.json();
+          user = response.data;
         }
       }
     } catch (err) {
-      console.error(err);
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error(`Server responded with status code ${err.response.status}`);
+        console.error(`Error message: ${err.response.data}`);
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('No response received from server');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error(`Error message: ${err.message}`);
+      }
     }
   
     dispatch({
@@ -115,22 +135,23 @@ export const AuthProvider = (props) => {
 
   const signIn = async (username, password) => {
     try{
-    const response = await fetch('http://localhost:3500/auth', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username,
-        password
-      })
-    });
+      const response = await axios.post(LOGIN_URL,
+        JSON.stringify({username,password}),
+        {
+          headers: {'Content-Type': 'application/json'},
+          withCredentials : false
+        })
 
-    if (!response.ok) {
+    if (response.statusText != 'OK') {
       throw new Error('Please check your username and password');
     }
 
-    const { token, user } = await response.json();
+
+    // const { token, user } = await response.json();
+    const { token, user } = response.data;
+
+    console.log('token',token);
+    console.log('user',user);
 
     // Store the JWT token in local storage
     localStorage.setItem('token', token);
@@ -146,10 +167,6 @@ export const AuthProvider = (props) => {
     }
   };
 
-  const signUp = async (email, name, password) => {
-    throw new Error('Sign up is not implemented');
-  };
-
   const signOut = () => {
     localStorage.removeItem('token');
     dispatch({
@@ -162,7 +179,6 @@ export const AuthProvider = (props) => {
       value={{
         ...state,
         signIn,
-        signUp,
         signOut
       }}
     >
