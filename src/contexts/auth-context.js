@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useReducer, useRef } from 'react'
 import PropTypes from 'prop-types';
 import axios from '../api/axios'
 const LOGIN_URL = '/auth'
-const REFRESH_TOKEN_URL = '/refresh'
+const REFRESH_TOKEN_URL = '/auth/refresh'
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
@@ -79,28 +79,17 @@ export const AuthProvider = (props) => {
     let user = null;
     
     try {
-      const token = localStorage.getItem('token');
-  
-      if (token) {
-        // Verify the JWT token on the backend
-        const response = await axios.post(REFRESH_TOKEN_URL, {}, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
+      isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
+      if (isAuthenticated) {
+        const user = localStorage.getItem('user');
+        dispatch({
+          type: HANDLERS.INITIALIZE,
+          payload: user
         });
-        // const response = await fetch('/refresh', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     Authorization: `Bearer ${token}`
-        //   }
-        // });
-  
-        if (response.status === 200) {
-          isAuthenticated = true;
-          user = response.data;
-        }
+      } else {
+        dispatch({
+          type: HANDLERS.INITIALIZE
+        });
       }
     } catch (err) {
       if (err.response) {
@@ -146,16 +135,13 @@ export const AuthProvider = (props) => {
       throw new Error('Please check your username and password');
     }
 
-
     // const { token, user } = await response.json();
     const { token, user } = response.data;
 
-    console.log('token',token);
-    console.log('user',user);
-
     // Store the JWT token in local storage
     localStorage.setItem('token', token);
-
+    localStorage.setItem('user', user);
+    
     dispatch({
       type: HANDLERS.SIGN_IN,
       payload: user
@@ -169,6 +155,7 @@ export const AuthProvider = (props) => {
 
   const signOut = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     dispatch({
       type: HANDLERS.SIGN_OUT
     });
