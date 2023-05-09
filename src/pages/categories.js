@@ -1,11 +1,39 @@
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { Box, Container, Stack, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CreateCategory } from 'src/sections/categories/create-category';
 import { CategoryList } from 'src/sections/categories/category-list';
+import axios from '../api/axios'
+const CREATE_CATEGORY_URL = '/categories'
 
-const Page = () => (
-  <>
+const Page = () => {
+
+    const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    fetchCategories()
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      // Make an API call to fetch categories
+      const token = localStorage.getItem('token')
+      const response = await axios.get(CREATE_CATEGORY_URL,
+          {
+            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+            withCredentials : false
+          })
+      // Handle the successful response here (e.g., show success message)
+    //   console.log(response.data);
+
+      // Update the categories state
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+  return (<>
     <Head>
       <title>
       Intranet IIRS Dashboard || Categories
@@ -44,44 +72,7 @@ const Page = () => (
               >
                 <CategoryList
               title="Project Categories"
-              orders={[
-                {
-                  id: 1,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                },
-                {
-                  id: 2,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                },
-                {
-                  id: 3,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                },
-                {
-                  id: 4,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                },
-                {
-                  id: 5,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                },
-                {
-                  id: 6,
-                  project_title: 'Modelling Spatio-temporal Forest Growth Dynamics using Dendroclimatological and Remote Sensing Observations in North East India',
-                  pi_name: 'Prof. S.K. Tripathi',
-                  isrocopi: 'Dr. Arijit Roy',
-                }
-              ]}
+              categories={categories}
               sx={{ height: '100%' }}
             />
                 
@@ -91,8 +82,8 @@ const Page = () => (
         </Stack>
       </Container>
     </Box>
-  </>
-);
+  </>)
+};
 
 Page.getLayout = (page) => (
   <DashboardLayout>

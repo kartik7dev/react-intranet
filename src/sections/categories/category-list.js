@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
+import { useCategoryContext } from 'src/contexts/category-context';
 import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
 import {
   Box,
@@ -25,7 +26,9 @@ const statusMap = {
 };
 
 export const CategoryList = (props) => {
-  const { orders = [], sx, title } = props;
+  const { categories = [], sx, title } = props;
+  const cat = useCategoryContext();
+  console.log(cat)
 
   return (
     <Card sx={sx}>
@@ -47,20 +50,20 @@ export const CategoryList = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {orders.map((order) => {
+              {categories.map((cat,key) => {
                 return (
                   <TableRow
                     hover
-                    key={order.id}
+                    key={key}
                   >
                     <TableCell>
-                      {order.id}
+                      {key+1}
                     </TableCell>
                     <TableCell>
-                      {order.project_title}
+                      {cat.categoryName}
                     </TableCell>
                     <TableCell>
-                      {order.pi_name}
+                      icon
                     </TableCell>
                   </TableRow>
                 );
