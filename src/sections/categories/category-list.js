@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
-import { useCategoryContext } from 'src/contexts/category-context';
 import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
+import PencilSquareIcon from '@heroicons/react/24/solid/PencilSquareIcon';
+import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
 import {
   Box,
   Button,
@@ -17,20 +18,10 @@ import {
   TableRow
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
-import { SeverityPill } from 'src/components/severity-pill';
-
-const statusMap = {
-  pending: 'warning',
-  delivered: 'success',
-  refunded: 'error'
-};
 
 export const CategoryList = (props) => {
-  const { categories = [], sx, title } = props;
-  const cat = useCategoryContext();
-  console.log(cat)
-
-  return (
+    const { categories = [], sx, title, onEditCategory, onDeleteCategory  } = props;
+    return (
     <Card sx={sx}>
       <CardHeader title={title} />
       <Scrollbar sx={{ flexGrow: 1 }}>
@@ -60,10 +51,37 @@ export const CategoryList = (props) => {
                       {key+1}
                     </TableCell>
                     <TableCell>
-                      {cat.categoryName}
+                      {cat.categoryName.toUpperCase()}
                     </TableCell>
                     <TableCell>
-                      icon
+                   
+                   
+                        <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small">
+                                <PencilSquareIcon/>
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                onClick={() => onEditCategory(cat)}
+                            >
+                        </Button>
+                        <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small" color="error">
+                                        <TrashIcon />
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                onClick={() => onDeleteCategory(cat)}
+                            >
+                        </Button>
+                       
+                   
                     </TableCell>
                   </TableRow>
                 );
@@ -73,7 +91,7 @@ export const CategoryList = (props) => {
         </Box>
       </Scrollbar>
       <Divider />
-      <CardActions sx={{ justifyContent: 'flex-end' }}>
+      {/* <CardActions sx={{ justifyContent: 'flex-end' }}>
         <Button
           color="inherit"
           endIcon={(
@@ -86,12 +104,15 @@ export const CategoryList = (props) => {
         >
           View all
         </Button>
-      </CardActions>
+      </CardActions> */}
     </Card>
   );
 };
 
-CategoryList.prototype = {
-  orders: PropTypes.array,
-  sx: PropTypes.object
+CategoryList.propTypes = {
+    categories: PropTypes.array,
+    sx: PropTypes.object,
+    title: PropTypes.string,
+    onEditCategory: PropTypes.func,
+    onDeleteCategory: PropTypes.func
 };

@@ -1,12 +1,10 @@
-import { useCallback, useState } from 'react'
-import { useCategory } from 'src/hooks/use-category'
+import { useCallback, useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import axios from '../../api/axios'
 const CREATE_CATEGORY_URL = '/categories'
 
-import {
-  Alert,  
+import { 
   Box,
   Button,
   Card,
@@ -14,20 +12,27 @@ import {
   CardContent,
   CardHeader,
   Divider,
-  Snackbar,
   TextField,
   Typography,
   Unstable_Grid2 as Grid
 } from '@mui/material';
 
-export const CreateCategory = () => {
-  const category = useCategory();
-  const [successMessage, setSuccessMessage] = useState('');
+export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setSuccessMessage }) => { 
+    
+    const initialValues = {
+        id : '',
+        categoryName: categoryToEdit.length !== 0 ? categoryToEdit.categoryName: '',
+        submit: null
+    }
+   
+    const cardStyle = {
+        border: categoryToEdit.length !== 0 ? '1px solid yellow' : 'none', // Add border when categoryToEdit is not an empty string
+        boxShadow: categoryToEdit.length !== 0 ? '0 0 8px rgba(255, 255, 0, 0.5)' : 'none',
+        transition: 'border 0.3s ease-in-out, box-shadow 0.3s ease-in-out'
+      };
+    
   const formik = useFormik({
-    initialValues: {
-      categoryName: '',
-      submit: null
-    },
+    initialValues: initialValues,
     validationSchema: Yup.object({
       categoryName: Yup
         .string()
@@ -36,21 +41,33 @@ export const CreateCategory = () => {
         .required('Category name is required')
     }),
     onSubmit: async (values, helpers) => {
-      try {
         try {
             helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
             const token = localStorage.getItem('token')
-            const response = await axios.post(CREATE_CATEGORY_URL,
-                JSON.stringify({values}),
-                {
-                  headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                  withCredentials : false
-                })
-            // Handle the successful response here (e.g., show success message)
-            console.log(response.data)
-            category.addCategory(response.data)
-            helpers.resetForm();
-            setSuccessMessage(response.data.message);
+            let response;
+            if (categoryToEdit.length !== 0) {
+                response = await axios.patch(CREATE_CATEGORY_URL,
+                    JSON.stringify({values}),
+                    {
+                    headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+                    withCredentials : false
+                    })
+                // Handle the successful response here (e.g., show success message)
+                onCreateCategory(response.data.data,true)
+                cancelCategoryUpdate()
+                setSuccessMessage(response.data.message);
+            } else{
+                response = await axios.post(CREATE_CATEGORY_URL,
+                    JSON.stringify({values}),
+                    {
+                    headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+                    withCredentials : false
+                    })
+                // Handle the successful response here (e.g., show success message)
+                onCreateCategory(response.data.data,false)
+                cancelCategoryUpdate()
+                setSuccessMessage(response.data.message);
+            }
           } catch (err) {
             // Handle the error here (e.g., show error message)
             helpers.setStatus({ success: false });
@@ -59,34 +76,28 @@ export const CreateCategory = () => {
           } finally {
             helpers.setSubmitting(false); // Set isSubmitting back to false to enable the submit button
           }
-      } catch (err) {
-        helpers.setStatus({ success: false });
-        helpers.setErrors({ submit: err.response.data.message });
-        helpers.setSubmitting(false);
-      }
     }
-  });
+  })
+  const cancelCategoryUpdate = () => {
+    setCategory([])
+    formik.resetForm()
+  }  
+  useEffect(() => {
+    formik.setFieldValue('categoryName', categoryToEdit.categoryName);
+    formik.setFieldValue('id', categoryToEdit._id);
+  }, [categoryToEdit.categoryName]);
 
   return (
     <>
-    <Snackbar 
-        open={!!successMessage} 
-        autoHideDuration={3000} 
-        onClose={() => setSuccessMessage('')}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-    >
-        <Alert onClose={() => setSuccessMessage('')} severity="success" sx={{ width: '100%' }}>
-            {successMessage}
-        </Alert>
-    </Snackbar>
+   
     <form
       autoComplete="off"
       noValidate
       onSubmit={formik.handleSubmit}
     >
-      <Card>
+      <Card sx={cardStyle}>
         <CardHeader
-          title="Create New Category"
+          title={categoryToEdit.length !== 0 ? 'Update Category':'Create New Category'}
         />
         <CardContent sx={{ pt: 0 }}>
           <Box sx={{ m: -1.5 }}>
@@ -127,8 +138,11 @@ export const CreateCategory = () => {
         <Divider />
         <CardActions sx={{ justifyContent: 'flex-start',ml:'18px'}}>
           <Button type="submit" variant="contained" disabled={formik.isSubmitting}>
-            Save details
+            {categoryToEdit.length !== 0 ? 'Update details':'Save details'}
           </Button>
+          {categoryToEdit.length !== 0 && <Button type="submit" color="error" variant="contained" onClick={cancelCategoryUpdate}>
+            Cancel
+          </Button>}
         </CardActions>
       </Card>
     </form>
