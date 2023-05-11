@@ -21,6 +21,7 @@ import { Scrollbar } from 'src/components/scrollbar';
 
 export const CategoryList = (props) => {
     const { categories = [], sx, title, onEditCategory, onDeleteCategory  } = props;
+    console.log(categories)
     return (
     <Card sx={sx}>
       <CardHeader title={title} />
@@ -33,7 +34,10 @@ export const CategoryList = (props) => {
                   S.No
                 </TableCell>
                 <TableCell>
-                  Project Category
+                  Parent Category
+                </TableCell>
+                <TableCell>
+                  Child Category
                 </TableCell>
                 <TableCell>
                   Action
@@ -41,8 +45,13 @@ export const CategoryList = (props) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {categories.map((cat,key) => {
-                return (
+            { categories.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} align='center'>
+                    No category added yet.
+                  </TableCell>
+                </TableRow>
+              ) : (categories.map((cat,key) => (
                   <TableRow
                     hover
                     key={key}
@@ -52,6 +61,9 @@ export const CategoryList = (props) => {
                     </TableCell>
                     <TableCell>
                       {cat.categoryName.toUpperCase()}
+                    </TableCell>
+                    <TableCell>
+                      {cat?.parentId?.categoryName.toUpperCase()}
                     </TableCell>
                     <TableCell>
                    
@@ -84,8 +96,8 @@ export const CategoryList = (props) => {
                    
                     </TableCell>
                   </TableRow>
-                );
-              })}
+                ))
+              )}
             </TableBody>
           </Table>
         </Box>

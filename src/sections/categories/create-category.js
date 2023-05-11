@@ -12,16 +12,21 @@ import {
   CardContent,
   CardHeader,
   Divider,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Typography,
   Unstable_Grid2 as Grid
 } from '@mui/material';
 
-export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setSuccessMessage }) => { 
+export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCategory,setSuccessMessage }) => { 
     
     const initialValues = {
         id : '',
         categoryName: categoryToEdit.length !== 0 ? categoryToEdit.categoryName: '',
+        parentId: categoryToEdit.length !== 0 ? categoryToEdit.parentId: '',
         submit: null
     }
    
@@ -38,13 +43,17 @@ export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setS
         .string()
         .matches(/^[aA-zZ\s&-]+$/, "Only alphabets are allowed for this field ")
         .max(255)
-        .required('Category name is required')
+        .required('Category name is required'),
+        parentId: Yup
+        .string()
+        .max(255)  
     }),
     onSubmit: async (values, helpers) => {
         try {
             helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
             const token = localStorage.getItem('token')
             let response;
+            // Update Category
             if (categoryToEdit.length !== 0) {
                 response = await axios.patch(CREATE_CATEGORY_URL,
                     JSON.stringify({values}),
@@ -56,6 +65,7 @@ export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setS
                 onCreateCategory(response.data.data,true)
                 cancelCategoryUpdate()
                 setSuccessMessage(response.data.message);
+            //  Create Category   
             } else{
                 response = await axios.post(CREATE_CATEGORY_URL,
                     JSON.stringify({values}),
@@ -105,6 +115,30 @@ export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setS
               container
               spacing={3}
             >
+                 <Grid xs={12} md={12}>
+                 <TextField
+                  fullWidth
+                  label="Parent Category"
+                  name="parentId"
+                  onBlur={formik.handleBlur}
+                  onChange={formik.handleChange}
+                  value={formik.values.parentId}
+                  select
+                  SelectProps={{ native: true }}
+                >
+                    <option value="">None</option>
+                  {categories.map((option) => (
+                    <option
+                      key={option._id}
+                      value={option._id}
+                    >
+                      {option.categoryName}
+                    </option>
+                 ))}
+                </TextField>
+                 
+                    
+             </Grid>
               
               <Grid
                 xs={12}
@@ -131,6 +165,8 @@ export const CreateCategory = ({onCreateCategory,categoryToEdit,setCategory,setS
                   </Typography>
                 )}
               </Grid>
+             
+
               
             </Grid>
           </Box>

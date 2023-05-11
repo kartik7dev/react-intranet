@@ -21,8 +21,10 @@ const Page = () => {
               )
             );
         }
-        else
-        setCategories([...categories, newCategory]);
+        else{
+          console.log(newCategory)
+          setCategories([...categories, newCategory]);
+        }  
       };
 
     const [selectedCategory, setSelectedCategory] = useState([]);
@@ -119,6 +121,7 @@ const Page = () => {
               >
                 <CreateCategory 
                     onCreateCategory={handleCreateCategory}
+                    categories={categories}
                     categoryToEdit={selectedCategory} 
                     setCategory={setSelectedCategory}
                     setSuccessMessage={setSuccessMessage}
