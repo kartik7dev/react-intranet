@@ -88,6 +88,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
           }
     }
   })
+  console.log(formik.values)
   const cancelCategoryUpdate = () => {
     setCategory([])
     formik.resetForm()
@@ -95,7 +96,8 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
   useEffect(() => {
     formik.setFieldValue('categoryName', categoryToEdit.categoryName);
     formik.setFieldValue('id', categoryToEdit._id);
-  }, [categoryToEdit.categoryName]);
+    formik.setFieldValue('parentId', categoryToEdit.parentId ? categoryToEdit.parentId._id : '');
+  }, [categoryToEdit]);
 
   return (
     <>

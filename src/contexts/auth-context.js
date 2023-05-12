@@ -138,6 +138,7 @@ export const AuthProvider = (props) => {
     // const { token, user } = await response.json();
     const { token, user } = response.data;
 
+    window.sessionStorage.setItem('authenticated',true)
     // Store the JWT token in local storage
     localStorage.setItem('token', token);
     localStorage.setItem('user', user);
@@ -154,6 +155,7 @@ export const AuthProvider = (props) => {
   };
 
   const signOut = () => {
+    window.sessionStorage.removeItem('authenticated')
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch({

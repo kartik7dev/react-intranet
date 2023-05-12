@@ -17,7 +17,7 @@ const Page = () => {
         if(editMode){
           setCategories((prevCategories) =>
               prevCategories.map((category) =>
-                category._id === newCategory._id ? { ...category, categoryName: newCategory.categoryName } : category
+                category._id === newCategory._id ? { ...category, categoryName: newCategory.categoryName,parentId: newCategory.parentId } : category
               )
             );
         }

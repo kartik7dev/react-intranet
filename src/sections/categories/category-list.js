@@ -34,10 +34,10 @@ export const CategoryList = (props) => {
                   S.No
                 </TableCell>
                 <TableCell>
-                  Parent Category
+                  Child Category
                 </TableCell>
                 <TableCell>
-                  Child Category
+                  Parent Category
                 </TableCell>
                 <TableCell>
                   Action
