@@ -5,7 +5,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CreateCategory } from 'src/sections/categories/create-category';
 import { CategoryList } from 'src/sections/categories/category-list';
 import axios from '../api/axios'
-const CREATE_CATEGORY_URL = '/categories'
+const CATEGORY_URL = '/categories'
 
 const Page = () => {
     const token = localStorage.getItem('token')
@@ -42,7 +42,7 @@ const Page = () => {
       try {
         // Make an API call to delete category
         
-        const response = await axios.delete(CREATE_CATEGORY_URL+'/'+ delCategoryId,
+        const response = await axios.delete(CATEGORY_URL+'/'+ delCategoryId,
             {
               headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
               withCredentials : false
@@ -75,7 +75,7 @@ const Page = () => {
     try {
       // Make an API call to fetch categories
       
-      const response = await axios.get(CREATE_CATEGORY_URL,
+      const response = await axios.get(CATEGORY_URL,
           {
             headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
             withCredentials : false

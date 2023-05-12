@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import axios from '../../api/axios'
-const CREATE_CATEGORY_URL = '/categories'
+const CATEGORY_URL = '/categories'
 
 import { 
   Box,
@@ -55,7 +55,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
             let response;
             // Update Category
             if (categoryToEdit.length !== 0) {
-                response = await axios.patch(CREATE_CATEGORY_URL,
+                response = await axios.patch(CATEGORY_URL,
                     JSON.stringify({values}),
                     {
                     headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
@@ -67,7 +67,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
                 setSuccessMessage(response.data.message);
             //  Create Category   
             } else{
-                response = await axios.post(CREATE_CATEGORY_URL,
+                response = await axios.post(CATEGORY_URL,
                     JSON.stringify({values}),
                     {
                     headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
