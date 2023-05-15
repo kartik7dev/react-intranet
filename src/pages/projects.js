@@ -20,6 +20,7 @@ const now = new Date();
 
 const Page = () => {
   const token = localStorage.getItem('token')
+  const [successMessage, setSuccessMessage] = useState('');
   const useProjects = (page, rowsPerPage) => {
     return useMemo(
       () => {
@@ -134,6 +135,17 @@ const Page = () => {
           </Stack>
         </Container>
       </Box>
+
+      <Snackbar 
+        open={!!successMessage} 
+        autoHideDuration={3000} 
+        onClose={() => setSuccessMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+    >
+        <Alert onClose={() => setSuccessMessage('')} severity="success" sx={{ width: '100%' }}>
+            {successMessage}
+        </Alert>
+    </Snackbar>
     </>
   );
 };

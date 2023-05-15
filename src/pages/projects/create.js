@@ -1,25 +1,36 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Head from 'next/head';
-import { Box, Button, Card, CardActions, CardContent, CardHeader, Divider, Container, Stack, TextField, Typography, Unstable_Grid2 as Grid } from '@mui/material';
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Container,Divider, Input, Stack, TextField, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useAuth } from 'src/hooks/use-auth';
+import axios from '../../api/axios'
+const CATEGORY_URL = '/categories'
 const PROJECT_URL = '/projects'
+const validFileExtensions = { application: ['pdf'] };
+
+function isValidFileType(fileName, fileType) {
+    const fileExtension = fileName.split('.').pop()
+    return fileName && fileType.some(category => validFileExtensions[category].includes(fileExtension));
+  }
 
 const Page = () => {
-      const auth = useAuth()
-      const initialValues = {
+    const [categories, setCategories] = useState([])
+    const token = localStorage.getItem('token')        
+    const auth = useAuth()
+    const userDetails = JSON.parse(auth.user)
+    const initialValues = {
           id : '',
           projectTitle : '',
-          userId : auth.userId,
+          userId : userDetails.userId,
           categoryId : '',
           piName : '', 
           focalPoint : '', 
           projectType : '',
           projectDoc : '', 
           submit: null
-      }
+    }
 
       const formik = useFormik({
         initialValues: initialValues,
@@ -31,36 +42,44 @@ const Page = () => {
             .required('Project Title is required'),
           categoryId : Yup
             .string()
-            .required(),
+            .required('Project Category is required'),
           piName : Yup
             .string()
             .matches(/^[aA-zZ\s&-]+$/, "Only alphabets are allowed for this field ")
             .max('255')
-            .required(),
+            .required('PI Name is required'),
           focalPoint : Yup
           .string()
           .matches(/^[aA-zZ\s&-]+$/, "Only alphabets are allowed for this field ")
           .max('255')
-          .required(),     
+          .required('ISRO Co-Pi/Focal Point is required'),     
           projectType : Yup
           .string()
-          .required(),     
+          .required('Project Type is required'),     
           projectDoc : Yup
           .mixed()
-          .required(),     
+          .required()
+          .test("FILE_FORMAT",
+          "Only .pdf files are allowed",
+          value => isValidFileType(value && value.name.toLowerCase(), ["application"])
+          ),        
         }),
         onSubmit: async (values, helpers) => {
             try {
-                helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
-                const token = localStorage.getItem('token')               
-                const response = await axios.patch(PROJECT_URL,
-                        JSON.stringify({values}),
+                // helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
+                const formData = new FormData();
+                // Loop through the values object and append each key-value pair to the FormData
+                Object.entries(values).forEach(([key, value]) => {
+                    formData.append(key, value);
+                });
+                const response = await axios.post(PROJECT_URL,
+                        formData,
                         {
-                        headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+                        headers: {'Authorization':`Bearer ${token}`},
                         withCredentials : false
                         })
                     // Handle the successful response here (e.g., show success message)
-                    setSuccessMessage(response.data.message);
+                   
                 //  Create Category   
               } catch (err) {
                 // Handle the error here (e.g., show error message)
@@ -72,23 +91,31 @@ const Page = () => {
               }
         }
       })
+      console.log(formik.values)
   
-      const handleChange = useCallback(
-        (event) => {
-          setValues((prevState) => ({
-            ...prevState,
-            [event.target.name]: event.target.value
-          }));
-        },
-        []
-      );
+      useEffect(() => {
+        fetchCategories()
+      }, []);
     
-      const handleSubmit = useCallback(
-        (event) => {
-          event.preventDefault();
-        },
-        []
-      );
+      const fetchCategories = async () => {
+        try {
+          // Make an API call to fetch categories
+          
+          const response = await axios.get(CATEGORY_URL,
+              {
+                headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+                withCredentials : false
+              })
+          // Handle the successful response here (e.g., show success message)
+        //   console.log(response.data);
+    
+          // Update the categories state
+          setCategories(response.data);
+        } catch (error) {
+          console.error('Error fetching categories:', error);
+        }
+      };
+      
   return <>
     <Head>
       <title>
@@ -122,7 +149,7 @@ const Page = () => {
                     <form
         autoComplete="off"
         noValidate
-        onSubmit={handleSubmit}
+        onSubmit={formik.handleSubmit}
         >
         <Card>
             <CardHeader
@@ -139,9 +166,11 @@ const Page = () => {
                     md={6}
                 >
                     <TextField
+                     error={!!(formik.touched.projectTitle && formik.errors.projectTitle)}
+                     helperText={formik.touched.projectTitle && formik.errors.projectTitle}
                       fullWidth
                       label="Project Title"
-                      name="Project Title"
+                      name="projectTitle"
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
                       required
@@ -153,20 +182,36 @@ const Page = () => {
                     md={6}
                 >
                     <TextField
-                      fullWidth
-                      label="Select Category"
-                      name="categoryId"
-                      onBlur={formik.handleBlur}
+                     error={!!(formik.touched.categoryId && formik.errors.categoryId)}
+                     helperText={formik.touched.categoryId && formik.errors.categoryId}
+                    fullWidth
+                    label="Select Category"
+                    name="categoryId"
+                    onBlur={formik.handleBlur}
                       onChange={formik.handleChange}
-                      required
-                      value={formik.values.categoryId}
-                    />
+                    required
+                    select
+                    SelectProps={{ native: true }}
+                    value={formik.values.categoryId}
+                    >
+                    <option>Select</option>    
+                    {categories.map((cat,key) => (
+                        <option
+                        key={key}
+                        value={cat._id}
+                        >
+                        {cat.categoryName.toUpperCase()}
+                        </option>
+                    ))}
+                    </TextField>
                 </Grid>
                 <Grid
                     xs={12}
                     md={6}
                 >
                     <TextField
+                     error={!!(formik.touched.piName && formik.errors.piName)}
+                     helperText={formik.touched.piName && formik.errors.piName}
                     fullWidth
                     label="PI Name"
                     name="piName"
@@ -181,6 +226,8 @@ const Page = () => {
                     md={6}
                 >
                     <TextField
+                     error={!!(formik.touched.focalPoint && formik.errors.focalPoint)}
+                     helperText={formik.touched.focalPoint && formik.errors.focalPoint}
                     fullWidth
                     label="ISRO Co-Pi / Focal Point"
                     name="focalPoint"
@@ -195,45 +242,52 @@ const Page = () => {
                     md={6}
                 >
                     <TextField
+                     error={!!(formik.touched.projectType && formik.errors.projectType)}
+                     helperText={formik.touched.projectType && formik.errors.projectType}
                     fullWidth
-                    label="Project Type"
+                    label="Select Status"
                     name="projectType"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
                     required
-                    value={formik.values.projectType}
-                    />
-                </Grid>
-                <Grid
-                    xs={12}
-                    md={6}
-                >
-                    <TextField
-                    fullWidth
-                    label="Select State"
-                    name="state"
-                    onChange={handleChange}
-                    required
                     select
                     SelectProps={{ native: true }}
-                    value={values.state}
+                    value={formik.values.projectType}
                     >
-                    {states.map((option) => (
-                        <option
-                        key={option.value}
-                        value={option.value}
-                        >
-                        {option.label}
-                        </option>
-                    ))}
+                    <option>Select</option>
+                    <option value="0">Ongoing</option>
+                    <option value="1">Completed</option>
                     </TextField>
                 </Grid>
+
+                <Grid item xs={12} md={6}>
+                    <TextField
+                            fullWidth
+                            error={!!(formik.touched.projectDoc && formik.errors.projectDoc)}
+                            helperText={formik.touched.projectDoc && formik.errors.projectDoc}
+                            label="Upload File"
+                            name="projectDoc"
+                            type="file"
+                            onChange={(event) => { console.log(event.target.files[0]); formik.setFieldValue("projectDoc", event.target.files[0])}}
+                            InputLabelProps={{
+                            shrink: true,
+                            }}
+                            InputProps={{
+                            inputProps: {
+                                accept: 'application/*', // Set the accepted file types if needed
+                            },
+                           
+                            }}
+                        onBlur={formik.handleBlur}
+                    />
+                </Grid>
+               
                 </Grid>
             </Box>
             </CardContent>
             <Divider />
             <CardActions sx={{ justifyContent: 'flex-end' }}>
-            <Button variant="contained">
+            <Button variant="contained" type="submit" disabled={formik.isSubmitting}>
                 Save details
             </Button>
             </CardActions>

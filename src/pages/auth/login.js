@@ -107,8 +107,8 @@ const Page = () => {
                 <Stack spacing={3}>
                   <TextField
                     error={!!(formik.touched.username && formik.errors.username)}
-                    fullWidth
                     helperText={formik.touched.username && formik.errors.username}
+                    fullWidth
                     label="Username"
                     name="username"
                     onBlur={formik.handleBlur}
