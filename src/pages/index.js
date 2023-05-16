@@ -8,6 +8,7 @@ import { CategoryCount } from 'src/sections/home/category-count';
 import { ProjectCount } from 'src/sections/home/project-count';
 import axios from '../api/axios'
 const CATEGORY_COUNT_URL = '/categories/count'
+const PROJECT_COUNT_URL = '/projects/count'
 
 const now = new Date();
 
@@ -15,9 +16,11 @@ const Page = () => {
   
   useEffect(() => {
     fetchCategoryCount()
+    fetchProjectCount()
   }, []);
 
   const [categoryCount,setCategoryCount] = useState('')
+  const [projectCount,setProjectCount] = useState('')
 
   const fetchCategoryCount = async () => {
     try {
@@ -37,6 +40,25 @@ const Page = () => {
       console.error('Error fetching categories:', error);
     }
   };
+  const fetchProjectCount = async () => {
+    try {
+      // Make an API call to fetch categories
+      const token = localStorage.getItem('token')
+      const response = await axios.get(PROJECT_COUNT_URL,
+          {
+            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+            withCredentials : false
+          })
+      // Handle the successful response here (e.g., show success message)
+    //   console.log(response.data);
+
+      // Update the categories count
+      setProjectCount(response.data.count);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
+
   return <>
     <Head>
       <title>
@@ -62,7 +84,7 @@ const Page = () => {
           >
             <ProjectCount
               sx={{ height: '100%' }}
-              value={0}
+              value={projectCount}
             />
           </Grid>
           <Grid

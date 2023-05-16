@@ -1,11 +1,16 @@
 import PropTypes from 'prop-types';
+import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+import PencilSquareIcon from '@heroicons/react/24/solid/PencilSquareIcon';
+import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
 import {
   Avatar,
   Box,
+  Button,
   Card,
   Checkbox,
   Stack,
+  SvgIcon,
   Table,
   TableBody,
   TableCell,
@@ -27,6 +32,11 @@ export const ProjectsTable = (props) => {
     rowsPerPage = 0,
   } = props;
 
+  const router = useRouter();
+
+  const handleProjectEdit = (projectId) => {
+    router.push(`/projects/edit/${projectId}`);
+};
 
   return (
     <Card>
@@ -76,7 +86,7 @@ export const ProjectsTable = (props) => {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {project.category.categoryName}
+                      {project.categoryId.categoryName}
                     </TableCell>
                     <TableCell>
                       {project.piName}
@@ -85,7 +95,30 @@ export const ProjectsTable = (props) => {
                       {project.focalPoint}
                     </TableCell>
                     <TableCell>
-                      Action icons
+                    <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small">
+                                <PencilSquareIcon/>
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                onClick={() => handleProjectEdit(project._id)}
+                            >
+                        </Button>
+                        <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small" color="error">
+                                        <TrashIcon />
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                
+                            >
+                        </Button>
                     </TableCell>
                   </TableRow>
                 );

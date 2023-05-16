@@ -1,12 +1,13 @@
 import { useCallback, useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Box, Button, Card, CardActions, CardContent, CardHeader, Container,Divider, Input, Stack, TextField, Typography, Unstable_Grid2 as Grid } from '@mui/material';
+import NextLink from 'next/link'
+import { Box, Button, Card, CardActions, CardContent, CardHeader, Container,Divider, Input, SvgIcon, Stack, TextField, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { useAuth } from 'src/hooks/use-auth';
-import axios from '../../api/axios'
+import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
+import axios from '../../../api/axios'
 const CATEGORY_URL = '/categories'
 const PROJECT_URL = '/projects'
 const validFileExtensions = { application: ['pdf'] };
@@ -16,23 +17,23 @@ function isValidFileType(fileName, fileType) {
     return fileName && fileType.some(category => validFileExtensions[category].includes(fileExtension));
   }
 
+  const initialValues = {
+    id : '',
+    projectTitle : '',
+    categoryId : '',
+    piName : '', 
+    focalPoint : '', 
+    projectType : '',
+    projectDoc : '', 
+    submit: null
+}
+
 const Page = () => {
+    const router = useRouter();
+    const { id } = router.query;
     const [categories, setCategories] = useState([])
     const token = localStorage.getItem('token')        
-    const auth = useAuth()
-    const router = useRouter()
-    const userDetails = JSON.parse(auth.user)
-    const initialValues = {
-          id : '',
-          projectTitle : '',
-          userId : userDetails?.userId,
-          categoryId : '',
-          piName : '', 
-          focalPoint : '', 
-          projectType : '',
-          projectDoc : '', 
-          submit: null
-    }
+    
 
       const formik = useFormik({
         initialValues: initialValues,
@@ -74,7 +75,7 @@ const Page = () => {
                 Object.entries(values).forEach(([key, value]) => {
                     formData.append(key, value);
                 });
-                const response = await axios.post(PROJECT_URL,
+                const response = await axios.patch(PROJECT_URL,
                         formData,
                         {
                         headers: {'Authorization':`Bearer ${token}`},
@@ -82,7 +83,6 @@ const Page = () => {
                         })
                     // Handle the successful response here (e.g., show success message)
                 router.push('/projects', { message: response.data.message });   
-                //  Create Category   
               } catch (err) {
                 // Handle the error here (e.g., show error message)
                 helpers.setStatus({ success: false });
@@ -93,12 +93,16 @@ const Page = () => {
               }
         }
       })
-      console.log(formik.values)
-  
+      
       useEffect(() => {
         fetchCategories()
+        
       }, []);
-    
+
+      useEffect(() => {
+        fetchProjectById(id)
+      },[formik.setValues])
+      
       const fetchCategories = async () => {
         try {
           // Make an API call to fetch categories
@@ -108,20 +112,37 @@ const Page = () => {
                 headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
                 withCredentials : false
               })
-          // Handle the successful response here (e.g., show success message)
-        //   console.log(response.data);
-    
-          // Update the categories state
-          setCategories(response.data);
+              setCategories(response.data);
+          
         } catch (error) {
           console.error('Error fetching categories:', error);
         }
       };
+
+      const fetchProjectById = async (projectId) => {
+        try {
+          // Make an API call to fetch categories
+          
+          const response = await axios.get(PROJECT_URL + '/get/'+ projectId,
+              {
+                headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+                withCredentials : false
+              })
+              formik.setValues(response.data.data);
+          // Handle the successful response here (e.g., show success message)
+        //   console.log(response.data);
+    
+          // Update the project state
+        } catch (error) {
+          console.error('Error fetching project:', error);
+        }
+      };
+
       
   return <>
     <Head>
       <title>
-      Intranet IIRS Dashboard || Add Project
+      Intranet IIRS Dashboard || Edit Project
       </title>
     </Head>
     <Box
@@ -135,7 +156,7 @@ const Page = () => {
         <Stack spacing={3}>
           <div>
             <Typography variant="h4">
-              Add Project
+              Edit Project
             </Typography>
           </div>
           <div>
@@ -155,7 +176,7 @@ const Page = () => {
         >
         <Card>
             <CardHeader
-            title="Submit a new project"
+            title="update your project here"
             />
             <CardContent sx={{ pt: 0 }}>
             <Box sx={{ m: -1.5 }}>
@@ -282,6 +303,26 @@ const Page = () => {
                             }}
                         onBlur={formik.handleBlur}
                     />
+                    {formik.values?.projectDocs?.map((doc,key) => (
+                     <NextLink key={key} href={process.env.NEXT_PUBLIC_DOC_URL + '/' + doc.projectDoc} target='_blank'>
+
+                     <Button
+                                color="error"
+                                startIcon={(
+                                    <SvgIcon fontSize="small">
+                                         <DocumentTextIcon/>
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant=""
+                                
+                                >
+                         
+                        </Button>
+                    </NextLink>
+                    ))}
+                    <Typography sx={{ fontSize: '0.875rem' }} color='error'> Uploading Documents here will replace the previous uploaded doc</Typography>
+
                 </Grid>
                
                 </Grid>

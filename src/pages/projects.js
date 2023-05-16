@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import axios from '../api/axios'
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import NextLink from 'next/link'
 import { subDays, subHours } from 'date-fns';
 import ArrowDownOnSquareIcon from '@heroicons/react/24/solid/ArrowDownOnSquareIcon';
@@ -20,17 +21,17 @@ const now = new Date();
 
 const Page = () => {
   const token = localStorage.getItem('token')
-  const [successMessage, setSuccessMessage] = useState('');
+  const router = useRouter();
+  const [project,setProject] = useState([])
   const useProjects = (page, rowsPerPage) => {
     return useMemo(
       () => {
         return applyPagination(project, page, rowsPerPage);
       },
-      [page, rowsPerPage]
+      [project, page, rowsPerPage]
     );
   };
 
-  const [project,setProject] = useState([])
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -51,6 +52,7 @@ const Page = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const projects = useProjects(page, rowsPerPage);
+  // console.log(projects)
 
   const handlePageChange = useCallback(
     (event, value) => {
@@ -125,7 +127,7 @@ const Page = () => {
             </Stack>
             <ProjectsSearch />
             <ProjectsTable
-              count={projects.length}
+              count={project.length}
               items={projects}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
@@ -135,17 +137,6 @@ const Page = () => {
           </Stack>
         </Container>
       </Box>
-
-      <Snackbar 
-        open={!!successMessage} 
-        autoHideDuration={3000} 
-        onClose={() => setSuccessMessage('')}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-    >
-        <Alert onClose={() => setSuccessMessage('')} severity="success" sx={{ width: '100%' }}>
-            {successMessage}
-        </Alert>
-    </Snackbar>
     </>
   );
 };
