@@ -21,7 +21,6 @@ import { Scrollbar } from 'src/components/scrollbar';
 
 export const CategoryList = (props) => {
     const { categories = [], sx, title, onEditCategory, onDeleteCategory  } = props;
-    console.log(categories)
     return (
     <Card sx={sx}>
       <CardHeader title={title} />

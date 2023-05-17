@@ -39,7 +39,7 @@ const Page = () => {
         validationSchema: Yup.object({
           projectTitle : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.]+$/, "Only alphabets are allowed for this field")
+            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Project Title is required'),
           categoryId : Yup
@@ -60,7 +60,7 @@ const Page = () => {
           .required('Project Type is required'),     
           projectDoc : Yup
           .mixed()
-          .required()
+          .required('Project document is required')
           .test("FILE_FORMAT",
           "Only .pdf files are allowed",
           value => isValidFileType(value && value.name.toLowerCase(), ["application"])
@@ -68,7 +68,7 @@ const Page = () => {
         }),
         onSubmit: async (values, helpers) => {
             try {
-                // helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
+                helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
                 const formData = new FormData();
                 // Loop through the values object and append each key-value pair to the FormData
                 Object.entries(values).forEach(([key, value]) => {
@@ -81,7 +81,7 @@ const Page = () => {
                         withCredentials : false
                         })
                     // Handle the successful response here (e.g., show success message)
-                router.push('/projects');   
+                    router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');     
                 //  Create Category   
               } catch (err) {
                 // Handle the error here (e.g., show error message)
@@ -93,7 +93,6 @@ const Page = () => {
               }
         }
       })
-      console.log(formik.values)
   
       useEffect(() => {
         fetchCategories()

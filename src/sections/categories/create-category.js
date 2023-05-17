@@ -88,7 +88,6 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
           }
     }
   })
-  console.log(formik.values)
   const cancelCategoryUpdate = () => {
     setCategory([])
     formik.resetForm()

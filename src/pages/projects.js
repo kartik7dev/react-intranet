@@ -7,7 +7,7 @@ import { subDays, subHours } from 'date-fns';
 import ArrowDownOnSquareIcon from '@heroicons/react/24/solid/ArrowDownOnSquareIcon';
 import ArrowUpOnSquareIcon from '@heroicons/react/24/solid/ArrowUpOnSquareIcon';
 import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
-import { Alert, Box, Button, Container, Snackbar, Stack, SvgIcon, Typography } from '@mui/material';
+import { Alert, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Stack, SvgIcon, Typography } from '@mui/material';
 import { useSelection } from 'src/hooks/use-selection';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { ProjectsSearch } from 'src/sections/projects/projects-search';
@@ -21,6 +21,9 @@ const now = new Date();
 
 const Page = () => {
   const token = localStorage.getItem('token')
+  const [open, setOpen] = useState(false)
+  const [delProjectId, setDelProjectId] = useState('')
+  const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
   const [project,setProject] = useState([])
   const useProjects = (page, rowsPerPage) => {
@@ -31,6 +34,10 @@ const Page = () => {
       [project, page, rowsPerPage]
     );
   };
+
+  useEffect(() => {
+    setSuccessMessage(router.query.successMsg); // Alerts 'Someone'
+  }, [router.query]);
 
 
   useEffect(() => {
@@ -67,6 +74,41 @@ const Page = () => {
     },
     []
   );
+
+  const deleteProject = async () => {
+    try {
+      // Make an API call to delete category
+      
+      const response = await axios.patch(PROJECT_URL+'/delete',
+        JSON.stringify({id : delProjectId}),
+          {
+            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+            withCredentials : false
+          })
+      // Handle the successful response here (e.g., show success message)
+    //   console.log(response.data);
+
+    setProject((prevProjects) =>
+    prevProjects.filter((proj) => proj._id !== delProjectId)
+    );
+    setSuccessMessage(response.data.message);
+      setDelProjectId('')
+      setOpen(false);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+    
+  }
+
+  const handleDeleteProject = (projectId) => {
+    setOpen(true)
+    setDelProjectId(projectId)
+  };
+
+  const handleDeleteClose = () => {
+    setDelCategoryId('')
+    setOpen(false);
+  };
 
   return (
     <>
@@ -133,10 +175,45 @@ const Page = () => {
               onRowsPerPageChange={handleRowsPerPageChange}
               page={page}
               rowsPerPage={rowsPerPage}
+              onDeleteProject={handleDeleteProject}
             />
           </Stack>
         </Container>
       </Box>
+
+      <Dialog
+        open={open}
+        onClose={handleDeleteClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Delete project ?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+          Do you really want to delete this project?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={deleteProject} autoFocus>
+            Yes
+          </Button>
+          <Button onClick={handleDeleteClose}>No</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar 
+        open={!!successMessage} 
+        autoHideDuration={3000} 
+        onClose={() => setSuccessMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+    >
+        <Alert onClose={() => setSuccessMessage('')} severity="success" sx={{ width: '100%' }}>
+            {successMessage}
+        </Alert>
+    </Snackbar>
+
     </>
   );
 };

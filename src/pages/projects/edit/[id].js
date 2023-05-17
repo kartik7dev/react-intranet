@@ -40,7 +40,7 @@ const Page = () => {
         validationSchema: Yup.object({
           projectTitle : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.]+$/, "Only alphabets are allowed for this field")
+            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Project Title is required'),
           categoryId : Yup
@@ -72,7 +72,7 @@ const Page = () => {
         }),
         onSubmit: async (values, helpers) => {
             try {
-                // helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
+                helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
                 const formData = new FormData();
                 // Loop through the values object and append each key-value pair to the FormData
                 Object.entries(values).forEach(([key, value]) => {
@@ -85,7 +85,7 @@ const Page = () => {
                         withCredentials : false
                         })
                     // Handle the successful response here (e.g., show success message)
-                router.push('/projects', { message: response.data.message });   
+                router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');   
               } catch (err) {
                 // Handle the error here (e.g., show error message)
                 helpers.setStatus({ success: false });
@@ -106,7 +106,6 @@ const Page = () => {
         fetchProjectById(id)
       },[formik.setValues])
 
-      console.log(formik.errors)
       
       const fetchCategories = async () => {
         try {
@@ -296,7 +295,7 @@ const Page = () => {
                             label="Upload File"
                             name="projectDoc"
                             type="file"
-                            onChange={(event) => { console.log(event.target.files[0]); formik.setFieldValue("projectDoc", event.target.files[0])}}
+                            onChange={(event) => { formik.setFieldValue("projectDoc", event.target.files[0])}}
                             InputLabelProps={{
                             shrink: true,
                             }}

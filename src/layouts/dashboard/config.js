@@ -1,6 +1,7 @@
 import QueueListIcon from '@heroicons/react/24/outline/QueueListIcon';
 import HomeIcon from '@heroicons/react/24/solid/HomeIcon';
 import ShoppingBagIcon from '@heroicons/react/24/solid/ShoppingBagIcon';
+import UserIcon from '@heroicons/react/24/solid/UserIcon';
 import { SvgIcon } from '@mui/material';
 
 export const items = [
@@ -28,6 +29,15 @@ export const items = [
     icon: (
       <SvgIcon fontSize="small">
         <ShoppingBagIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Users',
+    path: '/users',
+    icon: (
+      <SvgIcon fontSize="small">
+        <UserIcon />
       </SvgIcon>
     )
   },
