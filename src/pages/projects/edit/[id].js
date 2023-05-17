@@ -61,10 +61,13 @@ const Page = () => {
           .required('Project Type is required'),     
           projectDoc : Yup
           .mixed()
-          .required()
           .test("FILE_FORMAT",
           "Only .pdf files are allowed",
-          value => isValidFileType(value && value.name.toLowerCase(), ["application"])
+          value => {
+            if(!value) return true;
+            return isValidFileType(value.name.toLowerCase(), ["application"])
+          }
+            
           ),        
         }),
         onSubmit: async (values, helpers) => {
@@ -102,6 +105,8 @@ const Page = () => {
       useEffect(() => {
         fetchProjectById(id)
       },[formik.setValues])
+
+      console.log(formik.errors)
       
       const fetchCategories = async () => {
         try {

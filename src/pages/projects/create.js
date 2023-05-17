@@ -81,7 +81,7 @@ const Page = () => {
                         withCredentials : false
                         })
                     // Handle the successful response here (e.g., show success message)
-                router.push('/projects', { message: response.data.message });   
+                router.push('/projects');   
                 //  Create Category   
               } catch (err) {
                 // Handle the error here (e.g., show error message)
