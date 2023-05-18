@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import axios from '../../api/axios'
+import { useAuth } from 'src/hooks/use-auth';
 const CATEGORY_URL = '/categories'
 
 import { 
@@ -22,7 +23,7 @@ import {
 } from '@mui/material';
 
 export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCategory,setSuccessMessage }) => { 
-    
+    const {token} = useAuth()
     const initialValues = {
         id : '',
         categoryName: categoryToEdit.length !== 0 ? categoryToEdit.categoryName: '',
@@ -51,7 +52,6 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
     onSubmit: async (values, helpers) => {
         try {
             helpers.setSubmitting(true); // Set isSubmitting to true to disable the submit button
-            const token = localStorage.getItem('token')
             let response;
             // Update Category
             if (categoryToEdit.length !== 0) {

@@ -13,6 +13,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { ProjectsSearch } from 'src/sections/projects/projects-search';
 import { ProjectsTable } from 'src/sections/projects/projects-table';
 import { applyPagination } from 'src/utils/apply-pagination';
+import { useAuth } from 'src/hooks/use-auth';
 const PROJECT_URL = '/projects'
 
 const now = new Date();
@@ -20,6 +21,8 @@ const now = new Date();
 
 
 const Page = () => {
+  const {user} = useAuth()
+  console.log(JSON.parse(user));
   const token = localStorage.getItem('token')
   const [open, setOpen] = useState(false)
   const [delProjectId, setDelProjectId] = useState('')

@@ -37,12 +37,13 @@ const handlers = {
     };
   },
   [HANDLERS.SIGN_IN]: (state, action) => {
-    const user = action.payload;
+    const { token, user } = action.payload;
+
 
     return {
       ...state,
       isAuthenticated: true,
-      user
+      user,token
     };
   },
   [HANDLERS.SIGN_OUT]: (state) => {
@@ -81,7 +82,7 @@ export const AuthProvider = (props) => {
     try {
       isAuthenticated = window.sessionStorage.getItem('authenticated') === 'true';
       if (isAuthenticated) {
-        const user = localStorage.getItem('user');
+        const user = window.sessionStorage.getItem('user');
         dispatch({
           type: HANDLERS.INITIALIZE,
           payload: user
@@ -137,15 +138,12 @@ export const AuthProvider = (props) => {
 
     // const { token, user } = await response.json();
     const { token, user } = response.data;
-
+    window.sessionStorage.setItem('user',user)
     window.sessionStorage.setItem('authenticated',true)
-    // Store the JWT token in local storage
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', user);
     
     dispatch({
       type: HANDLERS.SIGN_IN,
-      payload: user
+      payload: { token, user }
     });
     } catch (err) {
       console.error(err);
@@ -156,7 +154,6 @@ export const AuthProvider = (props) => {
 
   const signOut = () => {
     window.sessionStorage.removeItem('authenticated')
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch({
       type: HANDLERS.SIGN_OUT

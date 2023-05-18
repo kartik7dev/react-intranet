@@ -7,30 +7,33 @@ import { UserCount } from 'src/sections/home/user-count';
 import { CategoryCount } from 'src/sections/home/category-count';
 import { ProjectCount } from 'src/sections/home/project-count';
 import axios from '../api/axios'
+import { useAuth } from 'src/hooks/use-auth';
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const CATEGORY_COUNT_URL = '/categories/count'
 const PROJECT_COUNT_URL = '/projects/count'
 
 const now = new Date();
 
 const Page = () => {
-  
+  const axiosPrivate = useAxiosPrivate()
+  const {token} = useAuth()
   useEffect(() => {
     fetchCategoryCount()
     fetchProjectCount()
   }, []);
 
-  const [categoryCount,setCategoryCount] = useState('')
-  const [projectCount,setProjectCount] = useState('')
+  const [categoryCount,setCategoryCount] = useState(0)
+  const [projectCount,setProjectCount] = useState(0)
 
   const fetchCategoryCount = async () => {
     try {
       // Make an API call to fetch categories
-      const token = localStorage.getItem('token')
-      const response = await axios.get(CATEGORY_COUNT_URL,
-          {
-            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-            withCredentials : false
-          })
+      // const response = await axios.get(CATEGORY_COUNT_URL,
+      //     {
+      //       headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
+      //       withCredentials : false
+      //     })
+      const response = await axiosPrivate.get(CATEGORY_COUNT_URL)
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);
 
@@ -43,7 +46,6 @@ const Page = () => {
   const fetchProjectCount = async () => {
     try {
       // Make an API call to fetch categories
-      const token = localStorage.getItem('token')
       const response = await axios.get(PROJECT_COUNT_URL,
           {
             headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},

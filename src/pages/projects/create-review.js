@@ -16,14 +16,16 @@ function isValidFileType(fileName, fileType) {
   }
 
 const Page = () => {
-    const [categories, setCategories] = useState([])
-    const token = localStorage.getItem('token')        
-    const auth = useAuth()
-    const router = useRouter()
+  const [categories, setCategories] = useState([])
+  const token = localStorage.getItem('token')        
+  const auth = useAuth()
+  const router = useRouter()
+  if(!window.sessionStorage.getItem('pid'))
+  window.sessionStorage.setItem('pid',router.query.pid)
     const userDetails = JSON.parse(auth.user)
     const initialValues = {
           id : '',
-          projectId : router.query.pid,
+          projectId : window.sessionStorage.getItem('pid'),
           userId : userDetails?.userId,
           remarks : '',
           description : '', 
@@ -52,19 +54,24 @@ const Page = () => {
             .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .required('Description is required'),
           reviewParameter1 : Yup
-            .number('Only digits allowed')
+            .string()
+            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewParameter2 : Yup
-            .number('Only digits allowed')
+            .string()
+            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewParameter3 : Yup
-            .number('Only digits allowed')
+            .string()
+            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewParameter4 : Yup
-            .number('Only digits allowed')
+            .string()
+            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewParameter5 : Yup
-            .number('Only digits allowed')
+            .string()
+            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewedBy : Yup
           .string()
@@ -96,6 +103,7 @@ const Page = () => {
                         withCredentials : false
                         })
                     // Handle the successful response here (e.g., show success message)
+                    window.sessionStorage.removeItem('pid')
                     router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');     
                 //  Create Category   
               } catch (err) {
@@ -108,6 +116,9 @@ const Page = () => {
               }
         }
       })
+
+      console.log(formik.values)
+      
   
       
   return <>

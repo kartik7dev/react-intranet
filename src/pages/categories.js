@@ -5,10 +5,11 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CreateCategory } from 'src/sections/categories/create-category';
 import { CategoryList } from 'src/sections/categories/category-list';
 import axios from '../api/axios'
+import { useAuth } from 'src/hooks/use-auth';
 const CREATE_CATEGORY_URL = '/categories'
 
 const Page = () => {
-    const token = localStorage.getItem('token')
+    const {token} = useAuth()
     const [categories, setCategories] = useState([])
     const [successMessage, setSuccessMessage] = useState('');
     const [delCategoryId, setDelCategoryId] = useState('')

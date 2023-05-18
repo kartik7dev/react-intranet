@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ArrowRightIcon from '@heroicons/react/24/solid/ArrowRightIcon';
 import PencilSquareIcon from '@heroicons/react/24/solid/PencilSquareIcon';
 import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
+import { useAuth } from 'src/hooks/use-auth';
 import {
   Box,
   Button,
@@ -20,6 +21,7 @@ import {
 import { Scrollbar } from 'src/components/scrollbar';
 
 export const CategoryList = (props) => {
+    const {token} = useAuth()
     const { categories = [], sx, title, onEditCategory, onDeleteCategory  } = props;
     return (
     <Card sx={sx}>
