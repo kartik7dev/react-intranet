@@ -1,15 +1,20 @@
+import { useState } from 'react'
 import PropTypes from 'prop-types';
+import { Document, Page, pdfjs } from "react-pdf";
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
-import PencilSquareIcon from '@heroicons/react/24/solid/PencilSquareIcon';
-import ClipboardDocumentListIcon from '@heroicons/react/24/solid/ClipboardDocumentListIcon';
-import TrashIcon from '@heroicons/react/24/solid/TrashIcon';
+import PencilSquareIcon from '@heroicons/react/24/outline/PencilSquareIcon';
+import ClipboardDocumentListIcon from '@heroicons/react/24/outline/ClipboardDocumentListIcon';
+import DocumentTextIcon from '@heroicons/react/24/outline/DocumentTextIcon';
+import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 import {
-  Avatar,
+    Avatar,
   Box,
   Button,
   Card,
   Checkbox,
+  Fade,
+  Modal,
   Stack,
   SvgIcon,
   styled,
@@ -25,6 +30,7 @@ import {
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import { getInitials } from 'src/utils/get-initials';
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 const BootstrapTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -37,7 +43,80 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
     },
   }));
 
+
+  
+
+  
+  const blue = {
+    200: '#99CCF3',
+    400: '#3399FF',
+    500: '#007FFF',
+  };
+  
+  const grey = {
+    50: '#f6f8fa',
+    100: '#eaeef2',
+    200: '#d0d7de',
+    300: '#afb8c1',
+    400: '#8c959f',
+    500: '#6e7781',
+    600: '#57606a',
+    700: '#424a53',
+    800: '#32383f',
+    900: '#24292f',
+  };
+  
+  const StyledModal = styled(Modal)`
+    position: fixed;
+    z-index: 1300;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `;
+  
+  
+  const style = (theme) => ({
+    width: 900,
+    borderRadius: '12px',
+    padding: '16px 32px 24px 32px',
+    backgroundColor: theme.palette.mode === 'dark' ? '#0A1929' : 'white',
+    boxShadow: `0px 2px 24px ${theme.palette.mode === 'dark' ? '#000' : '#383838'}`,
+  });
+
 export const ProjectsTable = (props) => {
+    const [open, setOpen] = useState(false);
+    const [document, setDocument] = useState('');
+    const [numPages, setNumPages] = useState(null);
+    const [pageNumber, setPageNumber] = useState(1);
+  
+    const onDocumentLoadSuccess = ({ numPages }) => {
+      setNumPages(numPages);
+    };
+  
+    const nextPage = () => {
+      if (pageNumber < numPages) {
+        setPageNumber(pageNumber + 1);
+      }
+    };
+  
+    const prevPage = () => {
+      if (pageNumber > 1) {
+        setPageNumber(pageNumber - 1);
+      }
+    };
+    const handleModalOpen = (projectDoc) => {
+    
+        setOpen(true);
+        projectDoc?.map((doc) => {
+            setDocument(doc.projectDoc)
+        })
+    }
+    const handleModalClose = () => setOpen(false);
+
   const {
     count = 0,
     items = [],
@@ -166,6 +245,21 @@ const addProjectReview = (pid) => {
                             >
                         </Button>
                         </BootstrapTooltip>
+                        <BootstrapTooltip title="View Document">
+                        <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small">
+                                        <DocumentTextIcon />
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                sx={{minWidth:'auto',padding:'0'}}
+                                onClick={() => handleModalOpen(project.projectDocs)}
+                            >
+                        </Button>
+                        </BootstrapTooltip>
                     </TableCell>
                   </TableRow>
                 );
@@ -183,7 +277,29 @@ const addProjectReview = (pid) => {
         rowsPerPage={rowsPerPage}
         rowsPerPageOptions={[5, 10, 25]}
       />
+
+        <StyledModal
+                aria-labelledby="unstyled-modal-title"
+                aria-describedby="unstyled-modal-description"
+                open={open}
+                onClose={handleModalClose}
+        
+            >
+                <Box sx={style}>
+                    {/* <iframe src={process.env.NEXT_PUBLIC_DOC_URL + '/' + document + "#toolbar=0"} width="100%" height='800px' onContextMenu={(e) => e.preventDefault()}></iframe> */}
+                    <Document
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        file={process.env.NEXT_PUBLIC_DOC_URL + '/' + document}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className="pdf-container"
+                    >
+                        <Page pageNumber={pageNumber} />
+                    </Document>
+                </Box>
+        </StyledModal>
     </Card>
+
+    
   );
 };
 
