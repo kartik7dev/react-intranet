@@ -5,8 +5,8 @@ import { Box, Button, Card, CardActions, CardContent, CardHeader, Container,Divi
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 import { useAuth } from 'src/hooks/use-auth';
-import axios from '../../api/axios'
 const CATEGORY_URL = '/categories'
 const PROJECT_URL = '/projects'
 const validFileExtensions = { application: ['pdf'] };
@@ -18,10 +18,10 @@ function isValidFileType(fileName, fileType) {
 
 const Page = () => {
     const [categories, setCategories] = useState([])
-    const token = localStorage.getItem('token')        
-    const auth = useAuth()
+    const axiosPrivate = useAxiosPrivate()
+    const {user} = useAuth()
     const router = useRouter()
-    const userDetails = JSON.parse(auth.user)
+    const userDetails = JSON.parse(user)
     const initialValues = {
           id : '',
           projectTitle : '',
@@ -74,12 +74,7 @@ const Page = () => {
                 Object.entries(values).forEach(([key, value]) => {
                     formData.append(key, value);
                 });
-                const response = await axios.post(PROJECT_URL,
-                        formData,
-                        {
-                        headers: {'Authorization':`Bearer ${token}`},
-                        withCredentials : false
-                        })
+                const response = await axiosPrivate.post(PROJECT_URL,formData)
                     // Handle the successful response here (e.g., show success message)
                     router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');     
                 //  Create Category   
@@ -102,11 +97,7 @@ const Page = () => {
         try {
           // Make an API call to fetch categories
           
-          const response = await axios.get(CATEGORY_URL,
-              {
-                headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                withCredentials : false
-              })
+          const response = await axiosPrivate.get(CATEGORY_URL)
           // Handle the successful response here (e.g., show success message)
         //   console.log(response.data);
     

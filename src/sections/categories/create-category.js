@@ -1,8 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import axios from '../../api/axios'
-import { useAuth } from 'src/hooks/use-auth';
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const CATEGORY_URL = '/categories'
 
 import { 
@@ -23,7 +22,7 @@ import {
 } from '@mui/material';
 
 export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCategory,setSuccessMessage }) => { 
-    const {token} = useAuth()
+    const axiosPrivate = useAxiosPrivate()
     const initialValues = {
         id : '',
         categoryName: categoryToEdit.length !== 0 ? categoryToEdit.categoryName: '',
@@ -55,24 +54,16 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
             let response;
             // Update Category
             if (categoryToEdit.length !== 0) {
-                response = await axios.patch(CATEGORY_URL,
-                    JSON.stringify({values}),
-                    {
-                    headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                    withCredentials : false
-                    })
+                response = await axiosPrivate.patch(CATEGORY_URL,
+                    JSON.stringify({values}))
                 // Handle the successful response here (e.g., show success message)
                 onCreateCategory(response.data.data,true)
                 cancelCategoryUpdate()
                 setSuccessMessage(response.data.message);
             //  Create Category   
             } else{
-                response = await axios.post(CATEGORY_URL,
-                    JSON.stringify({values}),
-                    {
-                    headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                    withCredentials : false
-                    })
+                response = await axiosPrivate.post(CATEGORY_URL,
+                    JSON.stringify({values}))
                 // Handle the successful response here (e.g., show success message)
                 onCreateCategory(response.data.data,false)
                 cancelCategoryUpdate()

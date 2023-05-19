@@ -1,19 +1,17 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
-import axios from '../api/axios'
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import NextLink from 'next/link'
 import { subDays, subHours } from 'date-fns';
-import ArrowDownOnSquareIcon from '@heroicons/react/24/solid/ArrowDownOnSquareIcon';
 import ArrowUpOnSquareIcon from '@heroicons/react/24/solid/ArrowUpOnSquareIcon';
 import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
 import { Alert, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Stack, SvgIcon, Typography } from '@mui/material';
-import { useSelection } from 'src/hooks/use-selection';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { ProjectsSearch } from 'src/sections/projects/projects-search';
 import { ProjectsTable } from 'src/sections/projects/projects-table';
 import { applyPagination } from 'src/utils/apply-pagination';
 import { useAuth } from 'src/hooks/use-auth';
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const PROJECT_URL = '/projects'
 
 const now = new Date();
@@ -22,8 +20,7 @@ const now = new Date();
 
 const Page = () => {
   const {user} = useAuth()
-  console.log(JSON.parse(user));
-  const token = localStorage.getItem('token')
+  const axiosPrivate = useAxiosPrivate()
   const [open, setOpen] = useState(false)
   const [delProjectId, setDelProjectId] = useState('')
   const [successMessage, setSuccessMessage] = useState('');
@@ -46,11 +43,7 @@ const Page = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get(PROJECT_URL,
-          {
-            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-            withCredentials : false
-          })
+        const response = await axiosPrivate.get(PROJECT_URL)
         setProject(response.data);
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -82,12 +75,7 @@ const Page = () => {
     try {
       // Make an API call to delete category
       
-      const response = await axios.patch(PROJECT_URL+'/delete',
-        JSON.stringify({id : delProjectId}),
-          {
-            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-            withCredentials : false
-          })
+      const response = await axiosPrivate.patch(PROJECT_URL+'/delete',JSON.stringify({id : delProjectId}),{headers: {'Content-Type': 'application/json'}})
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);
 

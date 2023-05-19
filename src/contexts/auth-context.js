@@ -7,13 +7,15 @@ const REFRESH_TOKEN_URL = '/auth/refresh'
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
   SIGN_IN: 'SIGN_IN',
-  SIGN_OUT: 'SIGN_OUT'
+  SIGN_OUT: 'SIGN_OUT',
+  REFRESH_TOKEN : 'REFRESH_TOKEN'
 };
 
 const initialState = {
   isAuthenticated: false,
   isLoading: true,
-  user: null
+  user: null,
+  token: null
 };
 
 const handlers = {
@@ -50,7 +52,16 @@ const handlers = {
     return {
       ...state,
       isAuthenticated: false,
-      user: null
+      user: null,
+      token : null
+    };
+  },
+  [HANDLERS.REFRESH_TOKEN]: (state, action) => {
+    const { token } = action.payload;
+
+    return {
+      ...state,
+      token
     };
   }
 };
@@ -154,7 +165,7 @@ export const AuthProvider = (props) => {
 
   const signOut = () => {
     window.sessionStorage.removeItem('authenticated')
-    localStorage.removeItem('user');
+    window.sessionStorage.removeItem('user');
     dispatch({
       type: HANDLERS.SIGN_OUT
     });

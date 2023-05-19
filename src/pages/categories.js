@@ -4,12 +4,11 @@ import { Alert, Box, Button, Container, Stack, Typography, Dialog, DialogActions
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { CreateCategory } from 'src/sections/categories/create-category';
 import { CategoryList } from 'src/sections/categories/category-list';
-import axios from '../api/axios'
-import { useAuth } from 'src/hooks/use-auth';
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const CREATE_CATEGORY_URL = '/categories'
 
 const Page = () => {
-    const {token} = useAuth()
+    const axiosPrivate = useAxiosPrivate()
     const [categories, setCategories] = useState([])
     const [successMessage, setSuccessMessage] = useState('');
     const [delCategoryId, setDelCategoryId] = useState('')
@@ -42,14 +41,8 @@ const Page = () => {
       try {
         // Make an API call to delete category
         
-        const response = await axios.delete(CREATE_CATEGORY_URL+'/'+ delCategoryId,
-            {
-              headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-              withCredentials : false
-            })
+        const response = await axiosPrivate.delete(CREATE_CATEGORY_URL+'/'+ delCategoryId)
         // Handle the successful response here (e.g., show success message)
-      //   console.log(response.data);
-  
         // Update the categories state
         setCategories((prevCategories) =>
           prevCategories.filter((cat) => cat._id !== delCategoryId)
@@ -75,11 +68,7 @@ const Page = () => {
     try {
       // Make an API call to fetch categories
       
-      const response = await axios.get(CREATE_CATEGORY_URL,
-          {
-            headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-            withCredentials : false
-          })
+      const response = await axiosPrivate.get(CREATE_CATEGORY_URL)
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);
 

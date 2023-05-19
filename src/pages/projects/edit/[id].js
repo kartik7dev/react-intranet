@@ -7,9 +7,9 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
-import axios from '../../../api/axios'
 const CATEGORY_URL = '/categories'
 const PROJECT_URL = '/projects'
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const validFileExtensions = { application: ['pdf'] };
 
 function isValidFileType(fileName, fileType) {
@@ -29,6 +29,7 @@ function isValidFileType(fileName, fileType) {
 }
 
 const Page = () => {
+    const axiosPrivate = useAxiosPrivate()
     const router = useRouter();
     const { id } = router.query;
     const [categories, setCategories] = useState([])
@@ -78,12 +79,7 @@ const Page = () => {
                 Object.entries(values).forEach(([key, value]) => {
                     formData.append(key, value);
                 });
-                const response = await axios.patch(PROJECT_URL,
-                        formData,
-                        {
-                        headers: {'Authorization':`Bearer ${token}`},
-                        withCredentials : false
-                        })
+                const response = await axiosPrivate.patch(PROJECT_URL,formData)
                     // Handle the successful response here (e.g., show success message)
                 router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');   
               } catch (err) {
@@ -111,11 +107,7 @@ const Page = () => {
         try {
           // Make an API call to fetch categories
           
-          const response = await axios.get(CATEGORY_URL,
-              {
-                headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                withCredentials : false
-              })
+          const response = await axiosPrivate.get(CATEGORY_URL)
               setCategories(response.data);
           
         } catch (error) {
@@ -127,11 +119,7 @@ const Page = () => {
         try {
           // Make an API call to fetch categories
           
-          const response = await axios.get(PROJECT_URL + '/get/'+ projectId,
-              {
-                headers: {'Content-Type': 'application/json','Authorization':`Bearer ${token}`},
-                withCredentials : false
-              })
+          const response = await axiosPrivate.get(PROJECT_URL + '/get/'+ projectId)
               formik.setValues(response.data.data);
           // Handle the successful response here (e.g., show success message)
         //   console.log(response.data);
