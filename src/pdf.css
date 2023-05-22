@@ -1,6 +1,7 @@
 .pdf-container {
-    display: block;
+    display: block; 
     user-select: none;
+    /* pointer-events: none; */
   }
   
   .controls {

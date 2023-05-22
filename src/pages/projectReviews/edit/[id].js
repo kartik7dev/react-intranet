@@ -1,25 +1,27 @@
 import { useCallback, useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import NextLink from 'next/link'
 import { Box, Button, Card, CardActions, CardContent, CardHeader, Container,Divider, Input, Stack, TextField, Typography, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useAuth } from 'src/hooks/use-auth';
+import DocumentTextIcon from "@heroicons/react/24/solid/DocumentTextIcon";
 import useAxiosPrivate from 'src/hooks/use-axios-private';
 const PROJECT_REVIEW_URL = '/project-reviews'
 const validFileExtensions = { application: ['pdf'] };
 
 function isValidFileType(fileName, fileType) {
-    const fileExtension = fileName.split('.').pop()
+    const fileExtension = fileName?.split('.').pop()
     return fileName && fileType.some(category => validFileExtensions[category].includes(fileExtension));
   }
 
 const Page = () => {
-  const axiosPrivate = useAxiosPrivate()
-  const [categories, setCategories] = useState([])  
-  const auth = useAuth()
   const router = useRouter()
+  const { id } = router.query;
+  const axiosPrivate = useAxiosPrivate()       
+  const auth = useAuth()
   if(!window.sessionStorage.getItem('pid'))
   window.sessionStorage.setItem('pid',router.query.pid)
     const userDetails = JSON.parse(auth.user)
@@ -82,10 +84,12 @@ const Page = () => {
           .required('Review Date is required'),     
           projectReviewDoc : Yup
           .mixed()
-          .required('Project document is required')
           .test("FILE_FORMAT",
           "Only .pdf files are allowed",
-          value => isValidFileType(value && value.name.toLowerCase(), ["application"])
+          value => {
+            if(!value) return true;
+            return isValidFileType(value?.name?.toLowerCase(), ["application"])
+          }
           ),        
         }),
         onSubmit: async (values, helpers) => {
@@ -96,7 +100,7 @@ const Page = () => {
                 Object.entries(values).forEach(([key, value]) => {
                     formData.append(key, value);
                 });
-                const response = await axiosPrivate.post(PROJECT_REVIEW_URL,formData)
+                const response = await axiosPrivate.patch(PROJECT_REVIEW_URL, formData)
                     // Handle the successful response here (e.g., show success message)
                     window.sessionStorage.removeItem('pid')
                     router.push({pathname : '/projects',query : {successMsg:response.data.message}},'/projects');     
@@ -112,14 +116,32 @@ const Page = () => {
         }
       })
 
-      console.log(formik.values)
+      useEffect(() => {
+        fetchReviewById(id)
+      },[formik.setValues])
+
+      const fetchReviewById = async (reviewId) => {
+        try {
+          // Make an API call to fetch categories
+          
+          const response = await axiosPrivate.get(PROJECT_REVIEW_URL + '/get/'+ reviewId)
+              formik.setValues(response.data.data);
+          // Handle the successful response here (e.g., show success message)
+        //   console.log(response.data);
+    
+          // Update the project state
+        } catch (error) {
+          console.error('Error fetching project:', error);
+        }
+      };
+
       
   
       
   return <>
     <Head>
       <title>
-      Intranet IIRS Dashboard || Add Project Review
+      Intranet IIRS Dashboard || Edit Project Review
       </title>
     </Head>
     <Box
@@ -133,7 +155,7 @@ const Page = () => {
         <Stack spacing={3}>
           <div>
             <Typography variant="h4">
-              Add Project Review
+              Edit Project Review
             </Typography>
           </div>
           <div>

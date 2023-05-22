@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types';
-import { Document, Page, pdfjs } from "react-pdf";
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
 import PencilSquareIcon from '@heroicons/react/24/outline/PencilSquareIcon';
 import ClipboardDocumentListIcon from '@heroicons/react/24/outline/ClipboardDocumentListIcon';
+import NewspaperIcon from '@heroicons/react/24/outline/NewspaperIcon';
 import DocumentTextIcon from '@heroicons/react/24/outline/DocumentTextIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 import {
@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import { getInitials } from 'src/utils/get-initials';
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+import StarRating from 'src/components/star-rating';
 
 const BootstrapTooltip = styled(({ className, ...props }) => (
     <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -87,8 +87,18 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
     boxShadow: `0px 2px 24px ${theme.palette.mode === 'dark' ? '#000' : '#383838'}`,
   });
 
+  const style2 = (theme) => ({
+    width: '90%',
+    borderRadius: '12px',
+    padding: '16px 32px 24px 32px',
+    backgroundColor: theme.palette.mode === 'dark' ? '#0A1929' : 'white',
+    boxShadow: `0px 2px 24px ${theme.palette.mode === 'dark' ? '#000' : '#383838'}`,
+  });
+
 export const ProjectsTable = (props) => {
     const [open, setOpen] = useState(false);
+    const [openReview, setOpenReview] = useState(false);
+    const [reviews, setReviews] = useState('');
     const [document, setDocument] = useState('');
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
@@ -116,6 +126,13 @@ export const ProjectsTable = (props) => {
         })
     }
     const handleModalClose = () => setOpen(false);
+    
+    const handleReviewModalOpen = (projectReviews) => { 
+        setOpenReview(true);
+        setReviews(projectReviews)
+        
+    }
+    const handleReviewModalClose = () => setOpenReview(false);
 
   const {
     count = 0,
@@ -131,6 +148,10 @@ export const ProjectsTable = (props) => {
 
   const handleProjectEdit = (projectId) => {
     router.push(`/projects/edit/${projectId}`);
+};
+
+  const handleProjectReviewEdit = (reviewId) => {
+    router.push(`/projectReviews/edit/${reviewId}`);
 };
 
 const addProjectReview = (pid) => {
@@ -161,6 +182,9 @@ const addProjectReview = (pid) => {
                 </TableCell>
                 <TableCell>
                   Posted By
+                </TableCell>
+                <TableCell>
+                  Document
                 </TableCell>
                 <TableCell>
                   Action
@@ -198,6 +222,23 @@ const addProjectReview = (pid) => {
                     </TableCell>
                     <TableCell>
                       {project.userId.firstName} {project.userId.lastName}
+                    </TableCell>
+                    <TableCell align='center'>
+                    <BootstrapTooltip title="View Document">
+                        <Button
+                                color="inherit"
+                                startIcon={(
+                                    <SvgIcon fontSize="small">
+                                        <DocumentTextIcon />
+                                    </SvgIcon>
+                                )}
+                                size="small"
+                                variant="text"
+                                sx={{minWidth:'auto',padding:'0'}}
+                                onClick={() => handleModalOpen(project.projectDocs)}
+                            >
+                        </Button>
+                        </BootstrapTooltip>
                     </TableCell>
                     <TableCell>
                     <BootstrapTooltip title="Edit Project">
@@ -245,21 +286,21 @@ const addProjectReview = (pid) => {
                             >
                         </Button>
                         </BootstrapTooltip>
-                        <BootstrapTooltip title="View Document">
+                        {project.projectReviews.length !== 0 && <BootstrapTooltip title="View Project Reviews">
                         <Button
                                 color="inherit"
                                 startIcon={(
                                     <SvgIcon fontSize="small">
-                                        <DocumentTextIcon />
+                                        <NewspaperIcon />
                                     </SvgIcon>
                                 )}
                                 size="small"
                                 variant="text"
                                 sx={{minWidth:'auto',padding:'0'}}
-                                onClick={() => handleModalOpen(project.projectDocs)}
+                                onClick={() => handleReviewModalOpen(project.projectReviews)}
                             >
                         </Button>
-                        </BootstrapTooltip>
+                        </BootstrapTooltip> }
                     </TableCell>
                   </TableRow>
                 );
@@ -279,22 +320,95 @@ const addProjectReview = (pid) => {
       />
 
         <StyledModal
-                aria-labelledby="unstyled-modal-title"
-                aria-describedby="unstyled-modal-description"
                 open={open}
                 onClose={handleModalClose}
         
             >
                 <Box sx={style}>
-                    {/* <iframe src={process.env.NEXT_PUBLIC_DOC_URL + '/' + document + "#toolbar=0"} width="100%" height='800px' onContextMenu={(e) => e.preventDefault()}></iframe> */}
-                    <Document
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        file={process.env.NEXT_PUBLIC_DOC_URL + '/' + document}
-                        onContextMenu={(e) => e.preventDefault()}
-                        className="pdf-container"
-                    >
-                        <Page pageNumber={pageNumber} />
-                    </Document>
+                    <iframe src={process.env.NEXT_PUBLIC_DOC_URL + '/' + document + "#toolbar=0"} width="100%" height='800px' className='pdf-container'></iframe>
+                </Box>
+        </StyledModal>
+
+        <StyledModal
+                open={openReview}
+                onClose={handleReviewModalClose}
+        
+            >
+                <Box sx={style2}>
+                        <Table>
+                    <TableHead>
+                    <TableRow>
+                        <TableCell>
+                        S.No
+                        </TableCell>
+                        <TableCell>
+                        Remarks
+                        </TableCell>
+                        <TableCell>
+                        Review Date
+                        </TableCell>
+                        <TableCell>
+                        Reviewed By
+                        </TableCell>
+                        <TableCell>
+                        Parameter 1
+                        </TableCell>
+                        <TableCell>
+                        Parameter 2
+                        </TableCell>
+                        <TableCell>
+                        Parameter 3
+                        </TableCell>
+                        <TableCell>
+                        Parameter 4
+                        </TableCell>
+                        <TableCell>
+                        Parameter 5
+                        </TableCell>
+                        <TableCell align='center'>
+                        Action
+                        </TableCell>
+                    </TableRow>
+                    </TableHead>
+                    <TableBody>
+                    { reviews.length !== 0 && reviews?.map((rv,key) => {
+                
+                        return (
+                        <TableRow
+                            hover
+                            key={key}
+                        >
+                            <TableCell>{key+1}</TableCell>
+                            <TableCell>{rv.remarks}</TableCell>
+                            <TableCell>{format(new Date(rv.reviewDate), 'MMM-yyyy')}</TableCell>
+                            <TableCell>{rv.reviewedBy}</TableCell>
+                            <TableCell><StarRating rating={rv.reviewParameter1}/></TableCell>
+                            <TableCell><StarRating rating={rv.reviewParameter2}/></TableCell>
+                            <TableCell><StarRating rating={rv.reviewParameter3}/></TableCell>
+                            <TableCell><StarRating rating={rv.reviewParameter4}/></TableCell>
+                            <TableCell><StarRating rating={rv.reviewParameter5}/></TableCell>
+                            <TableCell align='center'>
+                            <BootstrapTooltip title="Edit Review">
+                                <Button
+                                        color="primary"
+                                        startIcon={(
+                                            <SvgIcon fontSize="small">
+                                        <PencilSquareIcon/>
+                                            </SvgIcon>
+                                        )}
+                                        size="small"
+                                        variant="text"
+                                        sx={{minWidth:'auto',padding:'0'}}
+                                        onClick={() => handleProjectReviewEdit(rv._id)}
+                                        >
+                                </Button>
+                            </BootstrapTooltip>
+                            </TableCell>
+                        </TableRow>
+                        );
+                    })}
+                    </TableBody>
+                </Table>
                 </Box>
         </StyledModal>
     </Card>

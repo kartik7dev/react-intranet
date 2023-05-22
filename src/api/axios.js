@@ -7,5 +7,5 @@ export default axios.create({
 
 export const axiosPrivate = axios.create({
     baseURL : BASE_URL,
-    withCredentials : false,
+    withCredentials : true,
 }) 
