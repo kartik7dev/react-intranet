@@ -7,6 +7,7 @@ import ClipboardDocumentListIcon from '@heroicons/react/24/outline/ClipboardDocu
 import NewspaperIcon from '@heroicons/react/24/outline/NewspaperIcon';
 import DocumentTextIcon from '@heroicons/react/24/outline/DocumentTextIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
+import NextLink from 'next/link'
 import {
     Avatar,
   Box,
@@ -325,7 +326,7 @@ const addProjectReview = (pid) => {
         
             >
                 <Box sx={style}>
-                    <iframe src={process.env.NEXT_PUBLIC_DOC_URL + '/' + document + "#toolbar=0"} width="100%" height='800px' className='pdf-container'></iframe>
+                    <iframe src={process.env.NEXT_PUBLIC_DOC_URL + document + "#toolbar=0"} width="100%" height='800px' className='pdf-container'></iframe>
                 </Box>
         </StyledModal>
 
@@ -365,6 +366,9 @@ const addProjectReview = (pid) => {
                         <TableCell>
                         Parameter 5
                         </TableCell>
+                        <TableCell>
+                        Document
+                        </TableCell>
                         <TableCell align='center'>
                         Action
                         </TableCell>
@@ -387,6 +391,25 @@ const addProjectReview = (pid) => {
                             <TableCell><StarRating rating={rv.reviewParameter3}/></TableCell>
                             <TableCell><StarRating rating={rv.reviewParameter4}/></TableCell>
                             <TableCell><StarRating rating={rv.reviewParameter5}/></TableCell>
+                            
+                            <TableCell align='center'>
+                            <BootstrapTooltip title="Download Document">
+                                <NextLink href={process.env.NEXT_PUBLIC_REVIEW_DOC_URL + rv.projectReviewDoc} target='_blank'>
+                                  <Button
+                                          color="primary"
+                                          startIcon={(
+                                              <SvgIcon fontSize="small">
+                                                <DocumentTextIcon/>
+                                              </SvgIcon>
+                                          )}
+                                          size="small"
+                                          variant="text"
+                                          sx={{minWidth:'auto',padding:'0'}}
+                                          >
+                                  </Button>
+                                </NextLink>
+                            </BootstrapTooltip>
+                            </TableCell>
                             <TableCell align='center'>
                             <BootstrapTooltip title="Edit Review">
                                 <Button

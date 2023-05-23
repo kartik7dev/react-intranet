@@ -67,7 +67,7 @@ const Page = () => {
   const fetchCategories = async () => {
     try {
       // Make an API call to fetch categories
-      
+
       const response = await axiosPrivate.get(CREATE_CATEGORY_URL,{headers: { 'Content-Type': 'application/json' }})
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);

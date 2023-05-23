@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useReducer, useRef } from 'react'
 import PropTypes from 'prop-types';
 import useAxiosPrivate from 'src/hooks/use-axios-private';
 const LOGIN_URL = '/auth'
+const LOGOUT_URL = '/auth/logout'
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
@@ -38,7 +39,6 @@ const handlers = {
   },
   [HANDLERS.SIGN_IN]: (state, action) => {
     const { token, user } = action.payload;
-    console.log('token',token)
 
     return {
       ...state,
@@ -71,6 +71,7 @@ export const AuthProvider = (props) => {
   const initialized = useRef(false);
 
   const initialize = async () => {
+    console.log('initialize ran')
     // Prevent from calling twice in development mode with React.StrictMode enabled
     if (initialized.current) {
       return;
@@ -156,12 +157,15 @@ export const AuthProvider = (props) => {
     });
   }
 
-  const signOut = () => {
+  const signOut = async () => {
     window.sessionStorage.removeItem('authenticated')
     window.sessionStorage.removeItem('user');
-    dispatch({
-      type: HANDLERS.SIGN_OUT
-    });
+    const response = await axiosPrivate.post(LOGOUT_URL, {headers: { 'Content-Type': 'application/json' }})
+    if(response.status === 200){
+      dispatch({
+        type: HANDLERS.SIGN_OUT
+      });
+    }
   };
 
   return (
