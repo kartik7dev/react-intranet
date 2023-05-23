@@ -20,7 +20,7 @@ const Page = () => {
 
   const fetchCount = async () => {
     try {
-      const response = await axiosPrivate.get(DASHBOARD_URL)
+      const response = await axiosPrivate.get(DASHBOARD_URL,{headers: { 'Content-Type': 'application/json' }})
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);
 

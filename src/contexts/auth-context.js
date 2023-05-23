@@ -1,14 +1,12 @@
 import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import PropTypes from 'prop-types';
-import axios from '../api/axios'
+import useAxiosPrivate from 'src/hooks/use-axios-private';
 const LOGIN_URL = '/auth'
-const REFRESH_TOKEN_URL = '/auth/refresh'
 
 const HANDLERS = {
   INITIALIZE: 'INITIALIZE',
   SIGN_IN: 'SIGN_IN',
-  SIGN_OUT: 'SIGN_OUT',
-  REFRESH_TOKEN : 'REFRESH_TOKEN'
+  SIGN_OUT: 'SIGN_OUT'
 };
 
 const initialState = {
@@ -40,7 +38,7 @@ const handlers = {
   },
   [HANDLERS.SIGN_IN]: (state, action) => {
     const { token, user } = action.payload;
-
+    console.log('token',token)
 
     return {
       ...state,
@@ -55,14 +53,6 @@ const handlers = {
       user: null,
       token : null
     };
-  },
-  [HANDLERS.REFRESH_TOKEN]: (state, action) => {
-    const { token } = action.payload;
-
-    return {
-      ...state,
-      token
-    };
   }
 };
 
@@ -75,6 +65,7 @@ const reducer = (state, action) => (
 export const AuthContext = createContext({ undefined });
 
 export const AuthProvider = (props) => {
+  const axiosPrivate = useAxiosPrivate()
   const { children } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
   const initialized = useRef(false);
@@ -136,12 +127,7 @@ export const AuthProvider = (props) => {
 
   const signIn = async (username, password) => {
     try{
-      const response = await axios.post(LOGIN_URL,
-        JSON.stringify({username,password}),
-        {
-          headers: {'Content-Type': 'application/json'},
-          withCredentials : false
-        })
+      const response = await axiosPrivate.post(LOGIN_URL,JSON.stringify({username,password}), {headers: { 'Content-Type': 'application/json' }})
 
     if (response.statusText != 'OK') {
       throw new Error('Please check your username and password');
@@ -163,6 +149,13 @@ export const AuthProvider = (props) => {
     }
   };
 
+  const refreshToken = (token,user) => {
+    dispatch({
+      type: HANDLERS.SIGN_IN,
+      payload: { token, user }
+    });
+  }
+
   const signOut = () => {
     window.sessionStorage.removeItem('authenticated')
     window.sessionStorage.removeItem('user');
@@ -176,7 +169,8 @@ export const AuthProvider = (props) => {
       value={{
         ...state,
         signIn,
-        signOut
+        signOut,
+        refreshToken
       }}
     >
       {children}

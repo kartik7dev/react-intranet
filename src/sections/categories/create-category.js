@@ -55,7 +55,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
             // Update Category
             if (categoryToEdit.length !== 0) {
                 response = await axiosPrivate.patch(CATEGORY_URL,
-                    JSON.stringify({values}))
+                    JSON.stringify({values}),{headers: { 'Content-Type': 'application/json' }})
                 // Handle the successful response here (e.g., show success message)
                 onCreateCategory(response.data.data,true)
                 cancelCategoryUpdate()
@@ -63,7 +63,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
             //  Create Category   
             } else{
                 response = await axiosPrivate.post(CATEGORY_URL,
-                    JSON.stringify({values}))
+                    JSON.stringify({values}),{headers: { 'Content-Type': 'application/json' }})
                 // Handle the successful response here (e.g., show success message)
                 onCreateCategory(response.data.data,false)
                 cancelCategoryUpdate()

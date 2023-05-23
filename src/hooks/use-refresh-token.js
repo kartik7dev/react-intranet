@@ -9,15 +9,11 @@ const useRefreshToken = () => {
     const refresh = async () => {
         const response = await axios.get('/auth/refresh', {
             headers: {'Content-Type': 'application/json'},
-            withCredentials: false
+            withCredentials: true
         });
-        const { token } = response.data.accessToken;
-        console.log(token);
+        const { token,user } = response.data;
+        auth.refreshToken(token,user)
 
-        dispatch({
-            type: HANDLERS.REFRESH_TOKEN,
-            payload: { token }
-        });
     }
     return refresh;
 };
