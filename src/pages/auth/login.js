@@ -147,6 +147,14 @@ const Page = () => {
                   Continue
                 </Button>
               </form>
+
+              <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            <NextLink href="/auth/forgot-password" passHref>
+              <Link>Forgot password?</Link>
+            </NextLink>
+          </Typography>
+        </Box>
             
           
           </div>
