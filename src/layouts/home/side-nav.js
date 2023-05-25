@@ -35,40 +35,13 @@ export const SideNav = (props) => {
     >
       <Box
         sx={{
-          display: 'flex',
+          display: 'block',
           flexDirection: 'column',
           height: '100%'
         }}
       >
-        <Box sx={{ p: 3, display: 'flex', alignItems: 'center' }}>
-        <Box
-          component={NextLink}
-          href="/dashboard"
-          sx={{
-            display: 'inline-flex',
-            height: 32,
-            width: 32
-          }}
-        >
-          <Logo />
-        </Box>
-        <Box
-          sx={{
-            display: 'inline-flex',
-            ml: 2,
-            cursor: 'pointer',
-            p: '12px 10px',
-          }}
-        >
-          <Typography
-            color="inherit"
-            variant="subtitle1"
-          >
-            RPMD INTRANET
-          </Typography>
-        </Box>
-      </Box>
-      
+        
+        <Divider sx={{ borderColor: 'neutral.700' }} />
         <Box
           component="nav"
           sx={{
@@ -103,7 +76,7 @@ export const SideNav = (props) => {
             })}
           </Stack>
         </Box>
-      
+        <Divider sx={{ borderColor: 'neutral.700' }} />
       </Box>
     </Scrollbar>
   );
@@ -117,7 +90,8 @@ export const SideNav = (props) => {
           sx: {
             backgroundColor: 'neutral.800',
             color: 'common.white',
-            width: 280
+            width: 280,
+            position : 'relative'
           }
         }}
         variant="permanent"
@@ -139,7 +113,7 @@ export const SideNav = (props) => {
           width: 280
         }
       }}
-      sx={{ zIndex: (theme) => theme.zIndex.appBar + 100 }}
+      sx={{ zIndex: (theme) => theme.zIndex.appBar }}
       variant="temporary"
     >
       {content}

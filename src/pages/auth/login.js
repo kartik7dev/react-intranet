@@ -42,7 +42,7 @@ const Page = () => {
     onSubmit: async (values, helpers) => {
       try {
         await auth.signIn(values.username, values.password);
-        router.push('/');
+        router.push('/dashboard');
       } catch (err) {
         helpers.setStatus({ success: false });
         helpers.setErrors({ submit: err.response.data.message });
@@ -51,20 +51,6 @@ const Page = () => {
     }
   });
 
-  const handleMethodChange = useCallback(
-    (event, value) => {
-      setMethod(value);
-    },
-    []
-  );
-
-  const handleSkip = useCallback(
-    () => {
-      auth.skip();
-      router.push('/');
-    },
-    [auth, router]
-  );
 
   return (
     <>
