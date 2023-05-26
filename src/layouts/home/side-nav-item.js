@@ -1,22 +1,33 @@
+import React, { useState } from 'react';
 import NextLink from 'next/link';
 import PropTypes from 'prop-types';
-import { Box, ButtonBase } from '@mui/material';
+import { Box, ButtonBase, Collapse } from '@mui/material';
+import { SvgIcon } from '@mui/material';
+import ChevronRightIcon from '@heroicons/react/24/outline/ChevronRightIcon';
+import EnvelopeOpenIcon from '@heroicons/react/24/outline/EnvelopeOpenIcon';
 
 export const SideNavItem = (props) => {
-  const { active = false, disabled, external, icon, path, title } = props;
+  const { active = false, disabled, external, icon, path, title, subItems } = props;
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const linkProps = path
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const linkProps = (!subItems || subItems.length === 0)
+  ? path
     ? external
       ? {
-        component: 'a',
-        href: path,
-        target: '_blank'
-      }
+          component: 'a',
+          href: path,
+          target: '_blank',
+        }
       : {
-        component: NextLink,
-        href: path
-      }
-    : {};
+          component: NextLink,
+          href: path,
+        }
+    : {}
+  : {};
 
   return (
     <li>
@@ -38,6 +49,7 @@ export const SideNavItem = (props) => {
             backgroundColor: 'rgba(255, 255, 255, 0.04)'
           }
         }}
+        onClick={toggleExpand}
         {...linkProps}
       >
         {icon && (
@@ -75,9 +87,37 @@ export const SideNavItem = (props) => {
             })
           }}
         >
-          {title}
+          {title.toUpperCase()}
         </Box>
+        {subItems && subItems.length > 0 && (
+          <Box
+            component="span"
+            sx={{
+              color: 'neutral.400',
+              ...(active && {
+                color: 'primary.main'
+              }),
+              transition: 'transform 0.3s',
+              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)'
+            }}
+          >
+        <SvgIcon fontSize="small">
+          <ChevronRightIcon/>
+        </SvgIcon>
+          </Box>
+        )}
       </ButtonBase>
+      {subItems && subItems.length > 0 && (
+        <Collapse in={isExpanded}>
+           <Box ml={2}> 
+            {subItems.map((subItem, index) => (
+              <SideNavItem key={index} {...subItem} title={subItem.categoryName} path={`/category/${subItem._id}`} icon={<SvgIcon fontSize="small">
+              <EnvelopeOpenIcon />
+            </SvgIcon>} />
+            ))}
+          </Box>
+        </Collapse>
+      )}
     </li>
   );
 };
@@ -88,5 +128,6 @@ SideNavItem.propTypes = {
   external: PropTypes.bool,
   icon: PropTypes.node,
   path: PropTypes.string,
-  title: PropTypes.string.isRequired
+  title: PropTypes.string.isRequired,
+  subItems: PropTypes.arrayOf(PropTypes.object)
 };

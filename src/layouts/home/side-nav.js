@@ -1,24 +1,62 @@
-import NextLink from 'next/link';
+import {useState, useEffect} from 'react'
 import { usePathname } from 'next/navigation';
 import PropTypes from 'prop-types';
 import {
   Box,
-  Button,
   Divider,
   Drawer,
   Stack,
-  SvgIcon,
-  Typography,
   useMediaQuery
 } from '@mui/material';
-import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
-import { items } from './config';
 import { SideNavItem } from './side-nav-item';
+import ListBulletIcon from '@heroicons/react/24/outline/ListBulletIcon';
+import EnvelopeIcon from '@heroicons/react/24/outline/EnvelopeIcon';
+import { SvgIcon } from '@mui/material';
+import axios from 'src/api/axios';
+const CATEGORY_URL = '/categories/category-tree'
+
 
 export const SideNav = (props) => {
   const { open, onClose } = props;
+ 
   const pathname = usePathname();
+  const [items,setItems] = useState([])
+
+  const fetchCategories = async () => {
+    try {
+      // Make an API call to fetch categories
+
+      const response = await axios.get(CATEGORY_URL,{headers: { 'Content-Type': 'application/json' }})
+    // Update the categories state
+    const categories = response.data.data;
+
+    // Create the items array
+    const categoryItem = categories.map((category) => ({
+      title: category.categoryName,
+      path: `/category/${category._id}`,
+      icon: (
+        <SvgIcon fontSize="small">
+          <EnvelopeIcon />
+        </SvgIcon>
+      ),
+      subItems : category.subcategories
+    }));
+
+    setItems(categoryItem);
+
+    // Export the items array
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories()
+  },[])
+
+  console.log(items)
+
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
 
   const content = (
@@ -41,7 +79,6 @@ export const SideNav = (props) => {
         }}
       >
         
-        <Divider sx={{ borderColor: 'neutral.700' }} />
         <Box
           component="nav"
           sx={{
@@ -71,12 +108,12 @@ export const SideNav = (props) => {
                   key={item.title}
                   path={item.path}
                   title={item.title}
+                  subItems={item.subItems}
                 />
               );
             })}
           </Stack>
         </Box>
-        <Divider sx={{ borderColor: 'neutral.700' }} />
       </Box>
     </Scrollbar>
   );
@@ -88,7 +125,7 @@ export const SideNav = (props) => {
         open
         PaperProps={{
           sx: {
-            backgroundColor: 'neutral.800',
+            backgroundColor: '#fff',
             color: 'common.white',
             width: 280,
             position : 'relative'
@@ -108,7 +145,7 @@ export const SideNav = (props) => {
       open={open}
       PaperProps={{
         sx: {
-          backgroundColor: 'neutral.800',
+            backgroundColor: '#fff',
           color: 'common.white',
           width: 280
         }
