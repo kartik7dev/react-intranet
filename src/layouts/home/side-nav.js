@@ -20,7 +20,7 @@ const CATEGORY_URL = '/categories/category-tree'
 export const SideNav = (props) => {
   const { open, onClose } = props;
  
-  const pathname = usePathname();
+//   const pathname = usePathname();
   const [items,setItems] = useState([])
 
   const fetchCategories = async () => {
@@ -34,7 +34,7 @@ export const SideNav = (props) => {
     // Create the items array
     const categoryItem = categories.map((category) => ({
       title: category.categoryName,
-      path: `/category/${category._id}`,
+      categoryId: category._id,
       icon: (
         <SvgIcon fontSize="small">
           <EnvelopeIcon />
@@ -54,8 +54,6 @@ export const SideNav = (props) => {
   useEffect(() => {
     fetchCategories()
   },[])
-
-  console.log(items)
 
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
 
@@ -97,16 +95,16 @@ export const SideNav = (props) => {
             }}
           >
             {items.map((item) => {
-              const active = item.path ? (pathname === item.path) : false;
+            //   const active = item.path ? (pathname === item.path) : false;
 
               return (
                 <SideNavItem
-                  active={active}
+                //   active={active}
                   disabled={item.disabled}
                   external={item.external}
                   icon={item.icon}
                   key={item.title}
-                  path={item.path}
+                  categoryId={item.categoryId}
                   title={item.title}
                   subItems={item.subItems}
                 />
