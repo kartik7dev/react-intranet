@@ -39,7 +39,7 @@ const Page = () => {
         validationSchema: Yup.object({
           projectTitle : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Project Title is required'),
           categoryId : Yup
@@ -60,10 +60,12 @@ const Page = () => {
           .required('Project Type is required'),     
           projectDoc : Yup
           .mixed()
-          .required('Project document is required')
           .test("FILE_FORMAT",
           "Only .pdf files are allowed",
-          value => isValidFileType(value && value.name.toLowerCase(), ["application"])
+          value => {
+            if(!value) return true;
+            return isValidFileType(value.name.toLowerCase(), ["application"])
+          }
           ),        
         }),
         onSubmit: async (values, helpers) => {

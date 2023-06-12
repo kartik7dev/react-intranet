@@ -46,32 +46,38 @@ const Page = () => {
         validationSchema: Yup.object({
           remarks : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Remarks is required'),
           description : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .required('Description is required'),
           reviewParameter1 : Yup
-            .string()
-            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
+            .number()
+            .min(0, 'Number must be greater than or equal to 0')
+            .max(10, 'Number must be less than or equal to 10')
+            // .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
             .required('Parameter is required'),
           reviewParameter2 : Yup
-            .string()
-            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
+            .number()
+            .min(0, 'Number must be greater than or equal to 0')
+            .max(10, 'Number must be less than or equal to 10')
             .required('Parameter is required'),
           reviewParameter3 : Yup
-            .string()
-            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
+            .number()
+            .min(0, 'Number must be greater than or equal to 0')
+            .max(10, 'Number must be less than or equal to 10')
             .required('Parameter is required'),
           reviewParameter4 : Yup
-            .string()
-            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
+            .number()
+            .min(0, 'Number must be greater than or equal to 0')
+            .max(10, 'Number must be less than or equal to 10')
             .required('Parameter is required'),
           reviewParameter5 : Yup
-            .string()
-            .matches(/^[0-9]+$/, "Only numbers are allowed for this field")
+            .number()
+            .min(0, 'Number must be greater than or equal to 0')
+            .max(10, 'Number must be less than or equal to 10')
             .required('Parameter is required'),
           reviewedBy : Yup
           .string()
@@ -82,10 +88,15 @@ const Page = () => {
           .required('Review Date is required'),     
           projectReviewDoc : Yup
           .mixed()
-          .required('Project document is required')
+          // .required('Project document is required')
           .test("FILE_FORMAT",
           "Only .pdf files are allowed",
-          value => isValidFileType(value && value.name.toLowerCase(), ["application"])
+          value => {
+            if(!value) return true;
+            return isValidFileType(value && value.name.toLowerCase(), ["application"])
+
+          }
+          
           ),        
         }),
         onSubmit: async (values, helpers) => {
@@ -222,19 +233,19 @@ const Page = () => {
                     </Grid>
                     <Grid
                       xs={12}
-                      md={2}
+                      md={3}
                     >
                       <TextField
                      error={!!(formik.touched.reviewParameter1 && formik.errors.reviewParameter1)}
                      helperText={formik.touched.reviewParameter1 && formik.errors.reviewParameter1}
                       fullWidth
-                      label="Parameter 1"
+                      label="Results Assessment & Usage"
                       name="reviewParameter1"
                       onBlur={formik.handleBlur}
                       onChange={(event) => {
                         formik.handleChange(event)
                         const total = parseInt(event.target.value) + parseInt(formik.values.reviewParameter2) + parseInt(formik.values.reviewParameter3) + parseInt(formik.values.reviewParameter4) + parseInt(formik.values.reviewParameter5);
-                        formik.setFieldValue('reviewTotal',total)
+                        formik.setFieldValue('reviewTotal',total / 5)
                       }
                     }
                       required
@@ -249,13 +260,13 @@ const Page = () => {
                      error={!!(formik.touched.reviewParameter2 && formik.errors.reviewParameter2)}
                      helperText={formik.touched.reviewParameter2 && formik.errors.reviewParameter2}
                       fullWidth
-                      label="Parameter 2"
+                      label="Deliverables"
                       name="reviewParameter2"
                       onBlur={formik.handleBlur}
                       onChange={(event) => {
                         formik.handleChange(event)
                         const total = parseInt(event.target.value) + parseInt(formik.values.reviewParameter1) + parseInt(formik.values.reviewParameter3) + parseInt(formik.values.reviewParameter4) + parseInt(formik.values.reviewParameter5);
-                        formik.setFieldValue('reviewTotal',total)
+                        formik.setFieldValue('reviewTotal',total / 5)
                       }
                     }
                       required
@@ -270,13 +281,13 @@ const Page = () => {
                      error={!!(formik.touched.reviewParameter3 && formik.errors.reviewParameter3)}
                      helperText={formik.touched.reviewParameter3 && formik.errors.reviewParameter3}
                       fullWidth
-                      label="Parameter 3"
+                      label="Paper Publications"
                       name="reviewParameter3"
                       onBlur={formik.handleBlur}
                       onChange={(event) => {
                         formik.handleChange(event)
                         const total = parseInt(event.target.value) + parseInt(formik.values.reviewParameter2) + parseInt(formik.values.reviewParameter1) + parseInt(formik.values.reviewParameter4) + parseInt(formik.values.reviewParameter5);
-                        formik.setFieldValue('reviewTotal',total)
+                        formik.setFieldValue('reviewTotal',total / 5)
                       }
                     }
                       required
@@ -285,19 +296,19 @@ const Page = () => {
                       </Grid>
                     <Grid
                       xs={12}
-                      md={2}
+                      md={1}
                     >
                       <TextField
                      error={!!(formik.touched.reviewParameter4 && formik.errors.reviewParameter4)}
                      helperText={formik.touched.reviewParameter4 && formik.errors.reviewParameter4}
                       fullWidth
-                      label="Parameter 4"
+                      label="HRD"
                       name="reviewParameter4"
                       onBlur={formik.handleBlur}
                       onChange={(event) => {
                         formik.handleChange(event)
                         const total = parseInt(event.target.value) + parseInt(formik.values.reviewParameter2) + parseInt(formik.values.reviewParameter3) + parseInt(formik.values.reviewParameter1) + parseInt(formik.values.reviewParameter5);
-                        formik.setFieldValue('reviewTotal',total)
+                        formik.setFieldValue('reviewTotal',total / 5)
                       }
                     }
                       required
@@ -312,13 +323,13 @@ const Page = () => {
                      error={!!(formik.touched.reviewParameter5 && formik.errors.reviewParameter5)}
                      helperText={formik.touched.reviewParameter5 && formik.errors.reviewParameter5}
                       fullWidth
-                      label="Parameter 5"
+                      label="Seeding of Academia"
                       name="reviewParameter5"
                       onBlur={formik.handleBlur}
                       onChange={(event) => {
                         formik.handleChange(event)
                         const total = parseInt(event.target.value) + parseInt(formik.values.reviewParameter2) + parseInt(formik.values.reviewParameter3) + parseInt(formik.values.reviewParameter4) + parseInt(formik.values.reviewParameter1);
-                        formik.setFieldValue('reviewTotal',total)
+                        formik.setFieldValue('reviewTotal',total / 5)
                       }
                     }
                       required
@@ -333,7 +344,7 @@ const Page = () => {
                      error={!!(formik.touched.reviewTotal && formik.errors.reviewTotal)}
                      helperText={formik.touched.reviewTotal && formik.errors.reviewTotal}
                       fullWidth
-                      label="Parameter Total"
+                      label="Final Rating"
                       name="reviewTotal"
                       onBlur={formik.handleBlur}
                       onChange={formik.handleChange}

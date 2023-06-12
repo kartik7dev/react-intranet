@@ -97,6 +97,7 @@ const BootstrapTooltip = styled(({ className, ...props }) => (
   });
 
 export const ProjectsTable = (props) => {
+    console.log(props)
     const [open, setOpen] = useState(false);
     const [openReview, setOpenReview] = useState(false);
     const [reviews, setReviews] = useState('');
@@ -142,8 +143,24 @@ export const ProjectsTable = (props) => {
     onRowsPerPageChange,
     page = 0,
     rowsPerPage = 0,
-    onDeleteProject
+    onDeleteProject,
+    searchTerm
   } = props;
+
+  const highlightSearchTerm = (text) => {
+    if (searchTerm && text) {
+      const regex = new RegExp(`\\b(${searchTerm})\\b|(${searchTerm}\\w*)`, 'gi');
+      const segments = text.split(regex);
+  
+      return segments.map((segment, index) => {
+        if (segment?.match(regex)) {
+          return <span className="highlight" key={index}>{segment}</span>;
+        }
+        return segment;
+      });
+    }
+    return text;
+  };
 
   const router = useRouter();
 
@@ -182,6 +199,9 @@ const addProjectReview = (pid) => {
                   ISRO Co-PI / Focal Point
                 </TableCell>
                 <TableCell>
+                  Status
+                </TableCell>
+                <TableCell>
                   Posted By
                 </TableCell>
                 <TableCell>
@@ -193,14 +213,14 @@ const addProjectReview = (pid) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.length === 0 ? <TableCell colSpan={6} align="center">No Projects found</TableCell>: items.map((project,key) => {
+              {items.length === 0 ? <TableCell colSpan={9} align="center">No Projects found</TableCell>: items.map((project,key) => {
         
                 return (
                   <TableRow
                     hover
                     key={key}
                   >
-                    <TableCell>{key+1}</TableCell>
+                    <TableCell>{page*rowsPerPage+key+1}</TableCell>
                     <TableCell>
                       <Stack
                         alignItems="center"
@@ -208,21 +228,24 @@ const addProjectReview = (pid) => {
                         spacing={2}
                       >
                         <Typography variant="subtitle2">
-                          {project.projectTitle}
+                          {highlightSearchTerm(project.projectTitle)}
                         </Typography>
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {project.categoryId.categoryName}
+                      {highlightSearchTerm(project.categoryId.categoryName)}
                     </TableCell>
                     <TableCell>
-                      {project.piName}
+                      {highlightSearchTerm(project.piName)}
                     </TableCell>
                     <TableCell>
-                      {project.focalPoint}
+                      {highlightSearchTerm(project.focalPoint)}
                     </TableCell>
                     <TableCell>
-                      {project.userId.firstName} {project.userId.lastName}
+                      {project.projectType == 1 ? 'Completed': 'Ongoing'}
+                    </TableCell>
+                    <TableCell>
+                      {highlightSearchTerm(project.userId.firstName)} {highlightSearchTerm(project.userId.lastName)}
                     </TableCell>
                     <TableCell align='center'>
                     <BootstrapTooltip title="View Document">
@@ -317,7 +340,7 @@ const addProjectReview = (pid) => {
         onRowsPerPageChange={onRowsPerPageChange}
         page={page}
         rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[5, 10, 20, 25, 50, 100]}
       />
 
         <StyledModal

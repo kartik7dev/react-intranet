@@ -9,22 +9,30 @@ import {
   Box,
   Button,
   FormHelperText,
+  IconButton,
+  InputAdornment,
   Link,
   Stack,
   Tab,
   Tabs,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
+import {Visibility,VisibilityOff} from '@mui/icons-material';
 import { useAuth } from 'src/hooks/use-auth';
 import { Layout as AuthLayout } from 'src/layouts/auth/layout';
 
 const Page = () => {
   const router = useRouter();
   const auth = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleTogglePassword = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
   const formik = useFormik({
     initialValues: {
-      email: '',
+      username: '',
       password: '',
       submit: null
     },
@@ -110,8 +118,17 @@ const Page = () => {
                     name="password"
                     onBlur={formik.handleBlur}
                     onChange={formik.handleChange}
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={formik.values.password}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={handleTogglePassword} edge="end" size="large">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }}
                   />
                 </Stack>
                 {formik.errors.submit && (
@@ -136,9 +153,7 @@ const Page = () => {
 
               <Box sx={{ mt: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            <NextLink href="/auth/forgot-password" passHref>
-              <Link>Forgot password?</Link>
-            </NextLink>
+            <NextLink href="/auth/forgot-password">Forgot password?</NextLink>
           </Typography>
         </Box>
             

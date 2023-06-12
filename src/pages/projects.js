@@ -25,15 +25,28 @@ const Page = () => {
   const [delProjectId, setDelProjectId] = useState('')
   const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
-  const [project,setProject] = useState([])
-  const useProjects = (page, rowsPerPage) => {
-    return useMemo(
-      () => {
-        return applyPagination(project, page, rowsPerPage);
-      },
-      [project, page, rowsPerPage]
-    );
+  const [projects, setProjects] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+  const [rowsPerPage, setRowsPerPage] = useState(20);
+
+  const handleSearch = async(query) => {
+      setSearchValue(query)
+      const response = await axiosPrivate.get(PROJECT_URL,{
+        params: {
+          query,
+          page: page + 1, // Adjust page number to 1-indexed for server-side
+          perPage: rowsPerPage,
+        }  
+        });
+        setProjects(response.data.projects);
+        setTotalCount(response.data.totalCount);  
   };
+
+  const usePaginatedProjects = useMemo(() => {
+    return applyPagination(projects, page, rowsPerPage);
+  }, [projects, page, rowsPerPage]);
 
   useEffect(() => {
     setSuccessMessage(router.query.successMsg); // Alerts 'Someone'
@@ -43,18 +56,22 @@ const Page = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axiosPrivate.get(PROJECT_URL)
-        setProject(response.data);
+        const response = await axiosPrivate.get(PROJECT_URL, {
+          params: {
+            page: page + 1, // Adjust page number to 1-indexed for server-side
+            perPage: rowsPerPage,
+          },
+        });
+        setProjects(response.data.projects);
+        setTotalCount(response.data.totalCount);
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
     };
 
-  fetchProjects();
-}, []);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const projects = useProjects(page, rowsPerPage);
+    fetchProjects();
+  }, [page, rowsPerPage]);
+ 
   // console.log(projects)
 
   const handlePageChange = useCallback(
@@ -64,12 +81,10 @@ const Page = () => {
     []
   );
 
-  const handleRowsPerPageChange = useCallback(
-    (event) => {
-      setRowsPerPage(event.target.value);
-    },
-    []
-  );
+  const handleRowsPerPageChange = useCallback((event) => {
+    setRowsPerPage(event.target.value);
+    setPage(0); // Reset to first page when changing rows per page
+  }, []);
 
   const deleteProject = async () => {
     try {
@@ -79,7 +94,7 @@ const Page = () => {
       // Handle the successful response here (e.g., show success message)
     //   console.log(response.data);
 
-    setProject((prevProjects) =>
+    setProjects((prevProjects) =>
     prevProjects.filter((proj) => proj._id !== delProjectId)
     );
     setSuccessMessage(response.data.message);
@@ -97,8 +112,36 @@ const Page = () => {
   };
 
   const handleDeleteClose = () => {
-    setDelCategoryId('')
     setOpen(false);
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await axiosPrivate.post(PROJECT_URL+ '/export', null, {
+        responseType: 'blob', // Set the response type to blob
+      });
+      // Handle the response here (e.g., download the file)
+
+      const blob = new Blob([response.data], { type: 'application/vnd.ms-excel' });
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'projects.xlsx');
+      document.body.appendChild(link);
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Clean up the temporary link element
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      // You can access the file data in the response using response.data
+      console.log('Excel export response:', response);
+    } catch (error) {
+      console.error('Error exporting projects to Excel:', error);
+    }
   };
 
   return (
@@ -138,6 +181,7 @@ const Page = () => {
                         <ArrowUpOnSquareIcon />
                       </SvgIcon>
                     )}
+                    onClick={handleExportExcel}
                   >
                     Export Excel
                   </Button>
@@ -158,9 +202,10 @@ const Page = () => {
                 </NextLink>
               </div>
             </Stack>
-            <ProjectsSearch />
+            <ProjectsSearch onSearch={handleSearch}/>
             <ProjectsTable
-              count={project.length}
+              searchTerm={searchValue}
+              count={totalCount}
               items={projects}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}

@@ -13,3 +13,8 @@
       display: none;
     }
   }
+
+.highlight {
+    background-color: yellow;
+    text-decoration: underline;
+  }

@@ -41,7 +41,7 @@ const Page = () => {
         validationSchema: Yup.object({
           projectTitle : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Project Title is required'),
           categoryId : Yup

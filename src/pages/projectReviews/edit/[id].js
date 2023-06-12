@@ -48,12 +48,12 @@ const Page = () => {
         validationSchema: Yup.object({
           remarks : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .max(255)
             .required('Remarks is required'),
           description : Yup
             .string()
-            .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
+            // .matches(/^[aA-zZ\s&-.:]+$/, "Only alphabets are allowed for this field")
             .required('Description is required'),
           reviewParameter1 : Yup
             .string()

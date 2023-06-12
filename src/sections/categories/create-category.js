@@ -41,7 +41,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
     validationSchema: Yup.object({
       categoryName: Yup
         .string()
-        .matches(/^[aA-zZ\s&-]+$/, "Only alphabets are allowed for this field ")
+        // .matches(/^[aA-zZ\s&-]+$/, "Only alphabets are allowed for this field ")
         .max(255)
         .required('Category name is required'),
         parentId: Yup
@@ -124,7 +124,7 @@ export const CreateCategory = ({onCreateCategory,categories,categoryToEdit,setCa
                       key={option._id}
                       value={option._id}
                     >
-                      {option.categoryName}
+                      {option.categoryName.toUpperCase()}
                     </option>
                  ))}
                 </TextField>

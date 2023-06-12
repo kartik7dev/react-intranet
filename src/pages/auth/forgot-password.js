@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Box, Button, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import * as Yup from 'yup';
+import NextLink from 'next/link'
 import { Layout as AuthLayout } from 'src/layouts/auth/layout';
 import useAxiosPrivate from 'src/hooks/use-axios-private';
 import { useFormik } from 'formik';
@@ -100,6 +101,14 @@ const Page = () => {
           >
             Reset Password
           </Button>
+          <NextLink href="/auth/login">
+            <Button
+              variant='outlined'
+              sx={{ mt: 2, ml:1 }}
+            >
+              Go Back to login
+            </Button>
+          </NextLink>
         </form>
       </Box>
       <Snackbar 
