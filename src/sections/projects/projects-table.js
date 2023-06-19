@@ -233,7 +233,7 @@ const addProjectReview = (pid) => {
                       </Stack>
                     </TableCell>
                     <TableCell>
-                      {highlightSearchTerm(project.categoryId.categoryName)}
+                      {highlightSearchTerm(project.category.categoryName)}
                     </TableCell>
                     <TableCell>
                       {highlightSearchTerm(project.piName)}
@@ -245,7 +245,7 @@ const addProjectReview = (pid) => {
                       {project.projectType == 1 ? 'Completed': 'Ongoing'}
                     </TableCell>
                     <TableCell>
-                      {highlightSearchTerm(project.userId.firstName)} {highlightSearchTerm(project.userId.lastName)}
+                      {highlightSearchTerm(project.user.firstName)} {highlightSearchTerm(project.user.lastName)}
                     </TableCell>
                     <TableCell align='center'>
                     <BootstrapTooltip title="View Document">
