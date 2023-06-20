@@ -31,6 +31,15 @@ export const items = [
         <ShoppingBagIcon />
       </SvgIcon>
     )
-  }
+  },
+  {
+    title: 'Categorywise Projects',
+    path: '/',
+    icon: (
+      <SvgIcon fontSize="small">
+        <ShoppingBagIcon />
+      </SvgIcon>
+    )
+  },
  
 ];

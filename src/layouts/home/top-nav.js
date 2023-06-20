@@ -16,12 +16,24 @@ import { alpha } from '@mui/material/styles';
 import { usePopover } from 'src/hooks/use-popover';
 import { AccountPopover } from './account-popover';
 import { Logo } from 'src/components/logo';
+import { useAuth } from 'src/hooks/use-auth';
 
 const SIDE_NAV_WIDTH = 280;
 const TOP_NAV_HEIGHT = 64;
 
 export const TopNav = (props) => {
-  const { onNavOpen } = props;
+  const auth = useAuth();
+  const userDetails = JSON.parse(auth.user);
+  let redirect = {
+    text : 'Login',
+    url : '/auth/login'
+  }
+  if(userDetails){
+    redirect = {
+      text : 'Back to Dashboard',
+      url : '/dashboard'
+    }
+  }
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const accountPopover = usePopover();
 
@@ -71,8 +83,8 @@ export const TopNav = (props) => {
             direction="row"
             spacing={2}
           >
-             <NextLink href="/auth/login">
-                <Tooltip title="Login">
+             <NextLink href={redirect.url}>
+                <Tooltip title={redirect.text}>
                 <IconButton>
                     <Badge
                     >
