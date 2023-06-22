@@ -60,6 +60,7 @@ const handleModalClose = () => setOpen(false);
     if(categoryId){
       try{
       const response = await axios.get(PROJECT_URL + categoryId,{headers: { 'Content-Type': 'application/json' }})
+      console.log(response.data.data)
       setProjects(response.data.data)
       }
       catch(err){
@@ -141,7 +142,7 @@ const handleModalClose = () => setOpen(false);
                   </Stack>
                 </TableCell>
                 <TableCell>
-                  {project.categoryId.categoryName.toUpperCase()}
+                  {project.category.categoryName.toUpperCase()}
                 </TableCell>
                 <TableCell>
                   {project.piName}
